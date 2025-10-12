@@ -14,9 +14,10 @@ const demoUser: User = {
 };
 
 async function BookList() {
-  // Since there is no db access, we will return an empty array.
-  // When the DB issue is resolved, this will fetch the user's books.
-  const books = await Promise.resolve([]);
+  const books = await prisma.book.findMany({
+    where: { userId: demoUser.id },
+    orderBy: { createdAt: 'desc' },
+  });
   return <BookGrid books={books} />;
 }
 

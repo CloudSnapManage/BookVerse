@@ -31,28 +31,17 @@ export async function addBook(data: z.infer<typeof bookSchema>) {
   }
 
   try {
-    // We can't actually create a book without a database.
-    // For now, we will simulate success.
-    // In a real scenario with a DB, you would uncomment the following:
-    /*
     await prisma.book.create({
       data: {
         ...validatedFields.data,
         userId: demoUserId,
       },
     });
-    */
-
-    console.log('Simulating adding book for user:', demoUserId, validatedFields.data);
     
-    // Since we are not using a database right now, revalidation won't show new books.
-    // This is expected behavior for now.
     revalidatePath('/');
     return { success: true };
   } catch (error) {
     console.error('Failed to add book:', error);
-    // This error will likely be a database connection error
-    // because of the local environment issues we saw earlier.
     return { success: false, error: 'A server error occurred.' };
   }
 }
