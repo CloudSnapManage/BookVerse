@@ -15,7 +15,7 @@ import { ListFilter, ArrowUpDown } from 'lucide-react';
 import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
 import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 
-const sortKeys = ['createdAt', 'title', 'rating', 'status'] as const;
+const sortKeys = ['createdAt', 'title', 'rating', 'status', 'authors'] as const;
 type SortKey = typeof sortKeys[number];
 
 export type SortOption = {
@@ -28,6 +28,7 @@ const sortLabels: Record<SortKey, string> = {
     title: 'Title',
     rating: 'Rating',
     status: 'Status',
+    authors: 'Author',
 }
 
 type LibraryControlsProps = {
