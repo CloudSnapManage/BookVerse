@@ -10,9 +10,11 @@ import {
 } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
-import { Star } from 'lucide-react';
+import { Star, ExternalLink } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ScrollArea } from './ui/scroll-area';
+import { Button } from './ui/button';
+import Link from 'next/link';
 
 const defaultCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
 
@@ -61,14 +63,6 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
             </div>
             <ScrollArea className="flex-grow mt-6 pr-4 -mr-4">
                 <div className="space-y-4">
-                    {book.description && (
-                        <div>
-                            <h4 className="font-semibold">Description</h4>
-                            <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
-                                {book.description}
-                            </p>
-                        </div>
-                    )}
                     {book.notes && (
                         <div>
                             <h4 className="font-semibold">My Notes</h4>
@@ -77,13 +71,23 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
                             </p>
                         </div>
                     )}
-                     {!book.description && !book.notes && (
-                        <p className="text-sm text-muted-foreground">No description or notes for this book yet.</p>
+                     {!book.notes && (
+                        <p className="text-sm text-muted-foreground">No notes for this book yet.</p>
                      )}
                 </div>
             </ScrollArea>
-            <div className='mt-4 text-xs text-muted-foreground pt-4 border-t'>
-                {book.publishYear && <span>Published in {book.publishYear}</span>}
+            <div className='mt-4 flex items-center justify-between pt-4 border-t'>
+                <span className='text-xs text-muted-foreground'>
+                    {book.publishYear && `Published in ${book.publishYear}`}
+                </span>
+                {book.openLibraryId && (
+                    <Button asChild variant="outline" size="sm">
+                        <Link href={`https://openlibrary.org/works/${book.openLibraryId}`} target="_blank" rel="noopener noreferrer">
+                            Read More
+                            <ExternalLink className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                )}
             </div>
         </div>
       </DialogContent>
