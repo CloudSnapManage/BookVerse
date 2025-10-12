@@ -32,17 +32,41 @@ function BookListSkeleton() {
   );
 }
 
+const LOCAL_STORAGE_KEY = 'bookverse-library';
+
 export default function AppHomePage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-  // Simulate fetching books
+  // Load books from localStorage on initial render
   useEffect(() => {
-    // In a real app, you'd fetch this from an API
-    setBooks([]);
-    setLoading(false);
+    try {
+      const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (storedBooks) {
+        setBooks(JSON.parse(storedBooks));
+      }
+    } catch (error) {
+      console.error('Failed to parse books from localStorage', error);
+      // If parsing fails, start with an empty library
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Save books to localStorage whenever they change
+  useEffect(() => {
+    // We don't want to save the initial empty array on first render
+    // before we've had a chance to load from storage.
+    if (!loading) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(books));
+      } catch (error) {
+        console.error('Failed to save books to localStorage', error);
+      }
+    }
+  }, [books, loading]);
 
   const handleBookAdded = (newBookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
     const newBook: Book = {
