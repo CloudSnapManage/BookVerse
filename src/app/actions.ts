@@ -32,8 +32,11 @@ export async function addBook(data: z.infer<typeof bookSchema>) {
   console.log('Simulating adding book for user:', demoUserId, validatedFields.data);
 
   revalidatePath('/');
-  return { success: true, book: {
-    ...validatedFields.data,
-    description: validatedFields.data.notes, // Add description for detail view
-  } };
+  return { 
+    success: true, 
+    book: {
+        ...validatedFields.data,
+        description: validatedFields.data.notes || '', // Use notes as description
+    } 
+  };
 }

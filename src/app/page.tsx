@@ -75,7 +75,6 @@ export default function AppHomePage() {
       userId: demoUser.id,
       createdAt: new Date(),
       updatedAt: new Date(),
-      description: newBookData.notes || 'No description provided.',
     };
     setBooks(prevBooks => [newBook, ...prevBooks]);
   };

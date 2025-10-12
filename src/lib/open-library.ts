@@ -16,7 +16,31 @@ interface OpenLibraryDoc {
   publisher?: string[];
 }
 
-function normalizeBook(doc: OpenLibraryDoc): NormalizedBook {
+interface OpenLibraryWork {
+    description?: string | { type: string; value: string };
+}
+
+async function getWorkDescription(workId: string): Promise<string | null> {
+    try {
+        const response = await axios.get(`${OPEN_LIBRARY_API_URL}/works/${workId}.json`);
+        const work: OpenLibraryWork = response.data;
+        if (work.description) {
+            if (typeof work.description === 'string') {
+                return work.description;
+            }
+            if (typeof work.description === 'object' && work.description.value) {
+                return work.description.value;
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error(`Failed to fetch description for work ${workId}`, error);
+        return null;
+    }
+}
+
+
+function normalizeBook(doc: OpenLibraryDoc): Omit<NormalizedBook, 'description'> {
   const workId = doc.key.replace('/works/', '');
   return {
     openLibraryId: workId,
@@ -40,6 +64,14 @@ export async function searchAndNormalizeBooks(query: string, limit = 10): Promis
   
   // Deduplicate results by work ID
   const uniqueDocs = Array.from(new Map(docs.map(doc => [doc.key, doc])).values());
+  const normalizedBooks = uniqueDocs.map(normalizeBook);
 
-  return uniqueDocs.map(normalizeBook);
+  const booksWithDescriptions = await Promise.all(
+    normalizedBooks.map(async (book) => {
+        const description = await getWorkDescription(book.openLibraryId);
+        return { ...book, description };
+    })
+  );
+
+  return booksWithDescriptions;
 }
