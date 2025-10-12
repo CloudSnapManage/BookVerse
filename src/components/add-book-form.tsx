@@ -224,7 +224,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                     <FormItem>
                         <FormLabel>Release Year</FormLabel>
                         <FormControl>
-                            <Input type="number" placeholder="2023" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                            <Input type="number" placeholder="2023" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -240,7 +240,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                     <FormItem>
                         <FormLabel>Episodes</FormLabel>
                         <FormControl>
-                            <Input type="number" placeholder="24" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                            <Input type="number" placeholder="24" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
