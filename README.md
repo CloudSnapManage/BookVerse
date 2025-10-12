@@ -1,5 +1,7 @@
 # BookVerse - Personal Book Library Manager
 
+[![View on GitHub](https://img.shields.io/badge/GitHub-View_Source-blue?logo=github)](https://github.com/CloudSnapManage/BookVerse)
+
 BookVerse is a modern, personal web application that lets you manage your book library with ease. Search for any book, add it to your collection under different statuses (Owned, Wishlist, etc.), add personal notes and ratings, and view your entire library on a polished, filterable dashboard.
 
 ![BookVerse Screenshot](https://picsum.photos/seed/bookverse-app/1200/800)
@@ -9,23 +11,22 @@ BookVerse is a modern, personal web application that lets you manage your book l
 
 ## Features
 
-*   **📚 Powerful Book Search**: Instantly find books using the comprehensive Open Library API.
-*   **➕ Add Books Easily**: Add books to your library by searching and auto-filling details, or add them manually.
-*   **🗂️ Organize Your Library**: Categorize books as `Owned`, `Wishlist`, `Loaned`, or `Completed`.
-*   **✍️ Personalize**: Add your own 5-star ratings, private notes, and custom tags to each book.
+*   **📚 Powerful Book Search**: Instantly find books, movies, anime, and K-dramas from various APIs.
+*   **➕ Add Media Easily**: Add items to your library by searching and auto-filling details, or add them manually.
+*   **🗂️ Organize Your Library**: Categorize media with statuses like `Completed`, `Watching`, or `Wishlist`.
+*   **✍️ Personalize**: Add your own 5-star ratings and private notes to each item.
 *   **📊 Interactive Dashboard**: View your entire collection in a beautiful grid. Search, sort, and filter your library on the fly.
-*   **🔐 Secure & Private**: Your library is your own. Authentication is handled securely with NextAuth.js.
+*   **🎨 Customizable Themes**: Switch between multiple color themes and light/dark modes to personalize your experience.
 *   **📱 Fully Responsive**: A seamless experience whether you're on a desktop, tablet, or phone.
+*   **🔐 100% Private**: All data is stored securely in your browser's local storage. No accounts, no tracking.
 
 ## Tech Stack
 
 *   **Framework**: Next.js 15+ (App Router)
 *   **Language**: TypeScript
 *   **Styling**: Tailwind CSS & shadcn/ui
-*   **Database**: PostgreSQL
-*   **ORM**: Prisma
-*   **Authentication**: NextAuth.js (Google & Email)
-*   **Client Fetching**: SWR for real-time data fetching and caching.
+*   **State Management**: React Hooks & Local Storage
+*   **Client Fetching**: SWR for real-time search result fetching.
 *   **Validation**: Zod for type-safe schema validation.
 
 ## Getting Started
@@ -36,14 +37,13 @@ Follow these instructions to get a local copy of BookVerse up and running.
 
 *   Node.js 20+
 *   `pnpm` (or `npm`/`yarn`)
-*   A PostgreSQL database. You can use a free cloud provider like [Neon](https://neon.tech) or run it locally with Docker.
 
 ### Installation & Setup
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/bookverse.git
-    cd bookverse
+    git clone https://github.com/CloudSnapManage/BookVerse.git
+    cd BookVerse
     ```
 
 2.  **Install dependencies:**
@@ -53,38 +53,20 @@ Follow these instructions to get a local copy of BookVerse up and running.
 
 3.  **Set up environment variables:**
 
-    Create a `.env` file in the root of the project by copying the example file:
+    Create a `.env` file in the root of the project. While no keys are strictly required for the app to run (since it's fully client-side), you can add a TMDb API key to enable movie and K-Drama search.
     ```bash
     cp .env.example .env
     ```
 
-    Now, fill in the variables in your `.env` file:
-    *   `DATABASE_URL`: Your PostgreSQL connection string.
-    *   `AUTH_SECRET`: A secret key for NextAuth. Generate one with `openssl rand -base64 32`.
-    *   `AUTH_URL`: Should be `http://localhost:9002` for local development.
-    *   `AUTH_GOOGLE_ID` & `AUTH_GOOGLE_SECRET`: Your Google OAuth credentials (optional).
-    *   `AUTH_RESEND_KEY`: API key from Resend for sending email links (if using Email provider).
+    Now, fill in the optional variables in your `.env` file:
+    *   `TMDB_READ_ACCESS_TOKEN`: Your read access token from The Movie Database (TMDb) to enable movie/drama search.
 
-4.  **Set up the database:**
-
-    Run the Prisma migration to create the necessary tables in your database.
-    ```bash
-    pnpm prisma:migrate
-    ```
-    This will also generate the Prisma Client.
-
-5.  **Run the development server:**
+4.  **Run the development server:**
     ```bash
     pnpm run dev
     ```
 
     Open [http://localhost:9002](http://localhost:9002) in your browser to see the result.
-
-### Seeding the database (optional)
-You can seed the database with some sample data:
-```bash
-pnpm prisma:seed
-```
 
 ## License
 
