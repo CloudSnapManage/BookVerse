@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Moon, Sun, Palette, Check } from "lucide-react"
-import { useTheme } from "@/components/theme-provider"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,7 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
-  DropdownMenuSubContent
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
@@ -25,7 +26,33 @@ const themes = [
 ];
 
 export function ThemeToggle() {
-  const { mode, setMode, colorTheme, setColorTheme } = useTheme()
+  const { theme, setTheme, themes: availableThemes } = useTheme()
+
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  if (!mounted) {
+    return <Button variant="ghost" size="icon" disabled><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>
+  }
+
+  const currentThemeBase = theme?.split('-')[0] || 'slate';
+  const isDarkMode = theme?.includes('dark');
+
+  const setMode = (mode: 'light' | 'dark' | 'system') => {
+    if (mode === 'system') {
+        setTheme('system');
+        return;
+    }
+    const newTheme = mode === 'dark' ? `${currentThemeBase}-dark` : currentThemeBase.replace('-dark','');
+    setTheme(newTheme);
+  }
+
+  const setColorTheme = (color: string) => {
+    const newTheme = isDarkMode ? `${color}-dark` : color;
+    setTheme(newTheme);
+  }
 
   return (
     <DropdownMenu>
@@ -37,17 +64,17 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setMode("light")}>
+        <DropdownMenuItem onClick={() => setTheme(currentThemeBase.replace('-dark',''))}>
           <Sun className="mr-2 h-4 w-4" />
           <span>Light</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setMode("dark")}>
+        <DropdownMenuItem onClick={() => setTheme(`${currentThemeBase}-dark`)}>
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setMode("system")}>
-          <Sun className="mr-2 h-4 w-4" />
-          <span>System</span>
+        <DropdownMenuItem onClick={() => setTheme('system')}>
+            <Sun className="mr-2 h-4 w-4" /> {/* Or a different icon for system */}
+            <span>System</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
@@ -55,21 +82,29 @@ export function ThemeToggle() {
                 <Palette className="mr-2 h-4 w-4" />
                 <span>Theme</span>
             </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-                {themes.map((theme) => (
-                     <DropdownMenuItem 
-                        key={theme.value} 
-                        onClick={() => setColorTheme(theme.value)}
-                        className={cn(
-                            "justify-between",
-                            colorTheme === theme.value && "bg-accent"
-                        )}
-                    >
-                        <span>{theme.name}</span>
-                        {colorTheme === theme.value && <Check className="h-4 w-4" />}
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuSubContent>
+            <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                    {themes.map((themeOption) => {
+                        const baseTheme = theme?.split('-')[0];
+                        return (
+                            <DropdownMenuItem 
+                                key={themeOption.value} 
+                                onClick={() => {
+                                    const isDark = theme?.endsWith('-dark');
+                                    setTheme(isDark ? `${themeOption.value}-dark` : themeOption.value);
+                                }}
+                                className={cn(
+                                    "justify-between",
+                                    baseTheme === themeOption.value && "bg-accent"
+                                )}
+                            >
+                                <span>{themeOption.name}</span>
+                                {baseTheme === themeOption.value && <Check className="h-4 w-4" />}
+                            </DropdownMenuItem>
+                        )
+                    })}
+                </DropdownMenuSubContent>
+            </DropdownMenuPortal>
         </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
