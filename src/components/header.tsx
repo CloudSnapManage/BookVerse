@@ -2,6 +2,7 @@ import { AppLogo } from './logo';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { LayoutDashboard } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
   return (
@@ -10,13 +11,14 @@ export function Header() {
         <div className="mr-4 flex">
           <AppLogo />
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <Button variant="ghost" asChild>
             <Link href="/dashboard">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
             </Link>
           </Button>
+          <ThemeToggle />
         </div>
       </div>
     </header>
