@@ -12,7 +12,7 @@ import { SearchBooks } from './search-books';
 import type { NormalizedBook } from '@/lib/types';
 import { BOOK_STATUSES } from '@/lib/types';
 import { useTransition } from 'react';
-import { addBook } from '@/app/(protected)/actions';
+import { addBook } from '@/app/actions';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

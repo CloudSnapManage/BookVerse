@@ -14,9 +14,8 @@ const demoUser: User = {
 };
 
 async function BookList() {
-  // In a real app, you'd fetch this based on the logged-in user
-  // For now, we'll assume it's for the demo user if we were using a DB.
   // Since there is no db access, we will return an empty array.
+  // When the DB issue is resolved, this will fetch the user's books.
   const books = await Promise.resolve([]);
   return <BookGrid books={books} />;
 }
