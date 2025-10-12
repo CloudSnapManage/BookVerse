@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
-import type { Book, Movie } from '@prisma/client';
+import type { Book, Movie, Anime } from '@/lib/types';
 import { MediaGrid } from '@/components/media-grid';
 import { AddMediaButton } from '@/components/add-media-button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,7 +10,7 @@ import type { User } from 'next-auth';
 import { MediaDetailsDialog } from '@/components/media-details-dialog';
 import { TopLoader } from '@/components/top-loader';
 import { LibraryControls } from '@/components/library-controls';
-import type { BookStatus, MovieStatus } from '@/lib/types';
+import type { BookStatus, MovieStatus, AnimeStatus } from '@/lib/types';
 import type { SortOption } from '@/components/library-controls';
 import { AddBookSheet } from '@/components/add-book-sheet';
 
@@ -39,15 +39,15 @@ function MediaListSkeleton() {
 
 const LOCAL_STORAGE_KEY_BOOKS = 'bookverse-library';
 const LOCAL_STORAGE_KEY_MOVIES = 'movieverse-library';
-
+const LOCAL_STORAGE_KEY_ANIME = 'animeverse-library';
 
 export default function AppHomePage() {
-  const [media, setMedia] = useState<(Book | Movie)[]>([]);
+  const [media, setMedia] = useState<(Book | Movie | Anime)[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMedia, setSelectedMedia] = useState<Book | Movie | null>(null);
-  const [editingMedia, setEditingMedia] = useState<Book | Movie | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Book | Movie | Anime | null>(null);
+  const [editingMedia, setEditingMedia] = useState<Book | Movie | Anime | null>(null);
 
-  const [filter, setFilter] = useState<BookStatus | MovieStatus | 'All'>('All');
+  const [filter, setFilter] = useState<BookStatus | MovieStatus | AnimeStatus | 'All'>('All');
   const [sort, setSort] = useState<SortOption>({ key: 'createdAt', direction: 'desc' });
 
   // Load items from localStorage on initial render
@@ -56,8 +56,9 @@ export default function AppHomePage() {
       setTimeout(() => {
         const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY_BOOKS);
         const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
+        const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
         
-        let allMedia: (Book | Movie)[] = [];
+        let allMedia: (Book | Movie | Anime)[] = [];
 
         if (storedBooks) {
           const parsedBooks = JSON.parse(storedBooks).map((item: any) => ({
@@ -77,6 +78,15 @@ export default function AppHomePage() {
             }));
             allMedia = allMedia.concat(parsedMovies);
         }
+        if (storedAnime) {
+          const parsedAnime = JSON.parse(storedAnime).map((item: any) => ({
+              ...item,
+              mediaType: 'Anime',
+              createdAt: new Date(item.createdAt),
+              updatedAt: new Date(item.updatedAt),
+          }));
+          allMedia = allMedia.concat(parsedAnime);
+      }
         setMedia(allMedia);
         setLoading(false);
       }, 700);
@@ -93,15 +103,17 @@ export default function AppHomePage() {
       try {
         const books = media.filter(item => item.mediaType === 'Book');
         const movies = media.filter(item => item.mediaType === 'Movie');
+        const anime = media.filter(item => item.mediaType === 'Anime');
         localStorage.setItem(LOCAL_STORAGE_KEY_BOOKS, JSON.stringify(books));
         localStorage.setItem(LOCAL_STORAGE_KEY_MOVIES, JSON.stringify(movies));
+        localStorage.setItem(LOCAL_STORAGE_KEY_ANIME, JSON.stringify(anime));
       } catch (error) {
         console.error('Failed to save items to localStorage', error);
       }
     }
   }, [media, loading]);
 
-  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
     const newItem = {
       ...newMediaData,
       id: new Date().toISOString(), // Temporary unique ID
@@ -112,7 +124,7 @@ export default function AppHomePage() {
     setMedia(prevMedia => [newItem, ...prevMedia]);
   };
   
-  const handleMediaUpdated = (updatedMedia: Book | Movie) => {
+  const handleMediaUpdated = (updatedMedia: Book | Movie | Anime) => {
     setMedia(prevMedia =>
         prevMedia.map(item => (item.id === updatedMedia.id ? { ...updatedMedia, updatedAt: new Date() } : item))
     );
@@ -125,11 +137,11 @@ export default function AppHomePage() {
     setSelectedMedia(null);
   }
 
-  const handleMediaSelect = (item: Book | Movie) => {
+  const handleMediaSelect = (item: Book | Movie | Anime) => {
     setSelectedMedia(item);
   };
   
-  const handleEditRequest = (item: Book | Movie) => {
+  const handleEditRequest = (item: Book | Movie | Anime) => {
     setSelectedMedia(null);
     setEditingMedia(item);
   };
@@ -146,14 +158,14 @@ export default function AppHomePage() {
       let valA: any, valB: any;
 
       if (key === 'title' || key === 'status') {
-        valA = a[key].toLowerCase();
-        valB = b[key].toLowerCase();
+        valA = a[key]?.toLowerCase();
+        valB = b[key]?.toLowerCase();
       } else if (key === 'authors' && a.mediaType === 'Book' && b.mediaType === 'Book') {
         valA = (a as Book).authors[0]?.toLowerCase() || '';
         valB = (b as Book).authors[0]?.toLowerCase() || '';
       } else {
-        valA = a[key];
-        valB = b[key];
+        valA = a[key as keyof typeof a];
+        valB = b[key as keyof typeof b];
       }
       
       // Handle nulls for rating and dates

@@ -10,11 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SearchMedia } from './search-media';
 import type { NormalizedMedia } from '@/lib/types';
-import { BOOK_STATUSES, MOVIE_STATUSES } from '@/lib/types';
+import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES } from '@/lib/types';
 import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Book, Movie } from '@prisma/client';
+import type { Book, Movie, Anime } from '@/lib/types';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -26,8 +26,12 @@ const formSchema = z.object({
   releaseYear: z.number().optional(),
   tmdbId: z.number().optional(),
 
+  // Anime specific
+  episodes: z.number().optional(),
+  jikanMalId: z.number().optional(),
+
   // Common
-  mediaType: z.enum(['Book', 'Movie']),
+  mediaType: z.enum(['Book', 'Movie', 'Anime']),
   status: z.string(),
   rating: z.number().int().min(0).max(5).optional(),
   notes: z.string().optional(),
@@ -37,24 +41,28 @@ const formSchema = z.object({
 
 type AddBookFormProps = {
     onFormSubmit: (data: any, mediaId?: string) => void;
-    mediaToEdit?: Book | Movie | null;
+    mediaToEdit?: Book | Movie | Anime | null;
 };
 
 export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const [activeMediaType, setActiveMediaType] = useState<'Book' | 'Movie'>(mediaToEdit?.mediaType || 'Book');
+  const [activeMediaType, setActiveMediaType] = useState<'Book' | 'Movie' | 'Anime'>(mediaToEdit?.mediaType || 'Book');
   
   const isEditMode = !!mediaToEdit;
   
-  const currentStatuses = activeMediaType === 'Book' ? BOOK_STATUSES : MOVIE_STATUSES;
+  const currentStatuses = activeMediaType === 'Book' 
+    ? BOOK_STATUSES 
+    : activeMediaType === 'Movie' 
+    ? MOVIE_STATUSES
+    : ANIME_STATUSES;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
         title: '',
         authors: '',
-        status: activeMediaType === 'Book' ? 'Wishlist' : 'Watched',
+        status: 'Wishlist',
         rating: 0,
         notes: '',
         description: '',
@@ -72,12 +80,13 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         editValues.authors = (mediaToEdit as Book).authors.join(', ');
       }
       form.reset(editValues);
-      setActiveMediaType(mediaToEdit.mediaType);
+      setActiveMediaType(mediaToEdit.mediaType as 'Book' | 'Movie' | 'Anime');
     } else {
         form.reset({
             title: '',
             authors: '',
             releaseYear: undefined,
+            episodes: undefined,
             status: 'Wishlist',
             rating: 0,
             notes: '',
@@ -85,6 +94,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             coverUrl: null,
             openLibraryId: undefined,
             tmdbId: undefined,
+            jikanMalId: undefined,
             mediaType: 'Book',
         });
         setActiveMediaType('Book');
@@ -95,28 +105,37 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
 
   const handleMediaSelect = (media: NormalizedMedia) => {
     setActiveMediaType(media.mediaType);
+    const baseReset = {
+      ...form.getValues(),
+      title: media.title,
+      coverUrl: media.mediaType === 'Book' ? media.coverUrl : media.posterUrl,
+      description: media.mediaType === 'Book' ? media.description : media.overview,
+    }
+
     if (media.mediaType === 'Book') {
       form.reset({
-        ...form.getValues(),
+        ...baseReset,
         mediaType: 'Book',
-        title: media.title,
         authors: media.authors.join(', '),
-        coverUrl: media.coverUrl,
         openLibraryId: media.openLibraryId,
         publishYear: media.publishYear,
-        description: media.description,
         status: 'Owned',
       });
     } else if (media.mediaType === 'Movie') {
         form.reset({
-            ...form.getValues(),
+            ...baseReset,
             mediaType: 'Movie',
-            title: media.title,
-            coverUrl: media.posterUrl,
             tmdbId: media.tmdbId,
             releaseYear: media.releaseYear,
-            description: media.overview,
             status: 'Watched',
+        });
+    } else if (media.mediaType === 'Anime') {
+        form.reset({
+            ...baseReset,
+            mediaType: 'Anime',
+            jikanMalId: media.jikanMalId,
+            episodes: media.episodes,
+            status: 'Watching',
         });
     }
   };
@@ -142,11 +161,17 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
           authors: values.authors ? values.authors.split(',').map(a => a.trim()) : [],
           openLibraryId: values.openLibraryId,
         }
-      } else { // Movie
+      } else if (values.mediaType === 'Movie') {
         finalData = {
             ...commonData,
             releaseYear: values.releaseYear,
             tmdbId: values.tmdbId,
+        }
+      } else { // Anime
+        finalData = {
+          ...commonData,
+          episodes: values.episodes,
+          jikanMalId: values.jikanMalId
         }
       }
 
@@ -197,6 +222,21 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                         <FormLabel>Release Year</FormLabel>
                         <FormControl>
                             <Input type="number" placeholder="2023" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+          )}
+          {currentMediaType === 'Anime' && (
+             <FormField
+                control={form.control}
+                name="episodes"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Episodes</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="24" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>

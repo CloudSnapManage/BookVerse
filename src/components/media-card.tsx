@@ -1,4 +1,4 @@
-import type { Book, Movie } from '@prisma/client';
+import type { Book, Movie, Anime } from '@/lib/types';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Star } from 'lucide-react';
 
 const defaultBookCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
 const defaultMoviePoster = PlaceHolderImages.find(img => img.id === 'default-movie-poster') || defaultBookCover;
+const defaultAnimePoster = PlaceHolderImages.find(img => img.id === 'default-anime-poster') || defaultBookCover;
 
 function StarRating({ rating }: { rating: number | null | undefined }) {
     if (!rating) return null;
@@ -20,14 +21,19 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
 }
 
 type MediaCardProps = {
-    media: Book | Movie;
-    onSelect: (media: Book | Movie) => void;
+    media: Book | Movie | Anime;
+    onSelect: (media: Book | Movie | Anime) => void;
 }
 
 export function MediaCard({ media, onSelect }: MediaCardProps) {
   const isBook = media.mediaType === 'Book';
+  const isMovie = media.mediaType === 'Movie';
+  const isAnime = media.mediaType === 'Anime';
+
   const coverUrl = media.coverUrl;
-  const defaultCover = isBook ? defaultBookCover : defaultMoviePoster;
+  let defaultCover = defaultBookCover;
+  if (isMovie) defaultCover = defaultMoviePoster;
+  if (isAnime) defaultCover = defaultAnimePoster;
 
   return (
     <div 
@@ -58,9 +64,14 @@ export function MediaCard({ media, onSelect }: MediaCardProps) {
                 {(media as Book).authors.join(', ')}
             </p>
         )}
-        {!isBook && (media as Movie).releaseYear && (
+        {(isMovie) && (media as Movie).releaseYear && (
              <p className="text-sm text-muted-foreground truncate mt-0.5">
                 {(media as Movie).releaseYear}
+            </p>
+        )}
+        {(isAnime) && (media as Anime).episodes && (
+             <p className="text-sm text-muted-foreground truncate mt-0.5">
+                {(media as Anime).episodes} episodes
             </p>
         )}
         <div className="mt-2 flex items-center justify-between">

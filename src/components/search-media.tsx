@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
-import { Loader2, Search, Book, Film } from 'lucide-react';
+import { Loader2, Search, Book, Film, Tv } from 'lucide-react';
 import type { NormalizedMedia, MediaType } from '@/lib/types';
 import { Button } from './ui/button';
 
@@ -32,7 +32,9 @@ export function SearchMedia({
     debouncedQuery.length >= 3
       ? searchType === 'Book'
         ? `/api/search/books?q=${encodeURIComponent(debouncedQuery)}`
-        : `/api/search/movies?q=${encodeURIComponent(debouncedQuery)}`
+        : searchType === 'Movie'
+        ? `/api/search/movies?q=${encodeURIComponent(debouncedQuery)}`
+        : `/api/search/anime?q=${encodeURIComponent(debouncedQuery)}`
       : null;
 
   const { data: results, error, isLoading } = useSWR<NormalizedMedia[]>(apiUrl, fetcher);
@@ -60,6 +62,13 @@ export function SearchMedia({
     setIsFocused(false);
   };
 
+  const getMediaId = (media: NormalizedMedia) => {
+    if (media.mediaType === 'Book') return media.openLibraryId;
+    if (media.mediaType === 'Movie') return media.tmdbId;
+    if (media.mediaType === 'Anime') return media.jikanMalId;
+    return new Date().toISOString();
+  }
+
   return (
     <div className="relative" ref={searchContainerRef}>
         <div className="flex gap-2 mb-2">
@@ -78,6 +87,14 @@ export function SearchMedia({
                 className='h-8'
             >
                 <Film className="mr-2 h-4 w-4" /> Movies
+            </Button>
+            <Button 
+                variant={searchType === 'Anime' ? 'secondary' : 'ghost'}
+                size="sm" 
+                onClick={() => setSearchType('Anime')}
+                className='h-8'
+            >
+                <Tv className="mr-2 h-4 w-4" /> Anime
             </Button>
         </div>
       <div className="relative">
@@ -103,11 +120,11 @@ export function SearchMedia({
           ) : results && results.length > 0 ? (
             <ul>
               {results.map((media) => (
-                <li key={media.mediaType === 'Book' ? media.openLibraryId : media.tmdbId}>
+                <li key={getMediaId(media)}>
                   <button type="button" onClick={() => handleSelect(media)} className="w-full text-left p-3 hover:bg-accent transition-colors flex items-start gap-4">
                     <div className="relative h-20 w-14 flex-shrink-0 rounded-sm overflow-hidden bg-muted">
                         <Image
-                            src={(media.mediaType === 'Book' ? media.coverUrl : media.posterUrl) || `https://picsum.photos/seed/${media.mediaType === 'Book' ? media.openLibraryId : media.tmdbId}/100/150`}
+                            src={(media.mediaType === 'Book' ? media.coverUrl : media.posterUrl) || `https://picsum.photos/seed/${getMediaId(media)}/100/150`}
                             alt={`Cover of ${media.title}`}
                             fill
                             className="object-cover"
@@ -116,13 +133,17 @@ export function SearchMedia({
                     </div>
                     <div>
                       <p className="font-semibold leading-snug">{media.title}</p>
-                      {media.mediaType === 'Book' ? (
+                      {media.mediaType === 'Book' && (
                           <>
                             <p className="text-sm text-muted-foreground">{media.authors.join(', ')}</p>
                             {media.publishYear && <p className="text-xs text-muted-foreground mt-1">{media.publishYear}</p>}
                           </>
-                      ) : (
+                      )}
+                      {media.mediaType === 'Movie' && (
                           <p className="text-sm text-muted-foreground">{media.releaseYear}</p>
+                      )}
+                       {media.mediaType === 'Anime' && (
+                          <p className="text-sm text-muted-foreground">{media.episodes} episodes</p>
                       )}
                     </div>
                   </button>

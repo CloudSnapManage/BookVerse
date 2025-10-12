@@ -1,6 +1,6 @@
 'use client';
 
-import type { Book, Movie } from '@prisma/client';
+import type { Book, Movie, Anime } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
-import { Star, ExternalLink, Trash2, Edit, X } from 'lucide-react';
+import { Star, ExternalLink, Trash2, Edit, X, Tv } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
@@ -30,12 +30,14 @@ import {
 
 const defaultBookCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
 const defaultMoviePoster = PlaceHolderImages.find(img => img.id === 'default-movie-poster') || defaultBookCover;
+const defaultAnimePoster = PlaceHolderImages.find(img => img.id === 'default-anime-poster') || defaultBookCover;
+
 
 type MediaDetailsDialogProps = {
-  media: Book | Movie | null;
+  media: Book | Movie | Anime | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (media: Book | Movie) => void;
+  onEdit: (media: Book | Movie | Anime) => void;
   onDelete: (mediaId: string) => void;
 };
 
@@ -54,13 +56,17 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
   if (!media) return null;
 
   const isBook = media.mediaType === 'Book';
-  const book = isBook ? media as Book : null;
-  const movie = !isBook ? media as Movie : null;
+  const isMovie = media.mediaType === 'Movie';
+  const isAnime = media.mediaType === 'Anime';
   
-  const coverUrl = isBook ? book?.coverUrl : movie?.coverUrl;
-  const defaultCover = isBook ? defaultBookCover : defaultMoviePoster;
-  const openLibraryId = isBook ? book?.openLibraryId : null;
-  const tmdbId = !isBook ? movie?.tmdbId : null;
+  const coverUrl = media.coverUrl;
+  let defaultCover = defaultBookCover;
+  if (isMovie) defaultCover = defaultMoviePoster;
+  if (isAnime) defaultCover = defaultAnimePoster;
+
+  const book = isBook ? media as Book : null;
+  const movie = isMovie ? media as Movie : null;
+  const anime = isAnime ? media as Anime : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,7 +128,7 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                 <div className="space-y-6">
                     {media.description && (
                         <div>
-                            <h4 className="font-headline text-lg font-semibold mb-2">Description</h4>
+                            <h4 className="font-headline text-lg font-semibold mb-2">Synopsis</h4>
                             <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
                                 {media.description}
                             </div>
@@ -141,22 +147,31 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                 </div>
             </ScrollArea>
             <DialogFooter className='mt-auto flex-col sm:flex-row items-center justify-between pt-6 border-t'>
-                <span className='text-sm text-muted-foreground self-start sm:self-center'>
+                <span className='text-sm text-muted-foreground self-start sm:self-center flex items-center gap-2'>
                     {isBook && book?.publishYear && `Published in ${book.publishYear}`}
-                    {!isBook && movie?.releaseYear && `Released in ${movie.releaseYear}`}
+                    {isMovie && movie?.releaseYear && `Released in ${movie.releaseYear}`}
+                    {isAnime && anime?.episodes && <><Tv className="h-4 w-4" /> {anime.episodes} episodes</>}
                 </span>
-                {openLibraryId && (
+                {isBook && book?.openLibraryId && (
                     <Button asChild variant="outline">
-                        <Link href={`https://openlibrary.org/works/${openLibraryId}`} target="_blank" rel="noopener noreferrer">
+                        <Link href={`https://openlibrary.org/works/${book.openLibraryId}`} target="_blank" rel="noopener noreferrer">
                             Read More
                             <ExternalLink className="ml-2 h-4 w-4" />
                         </Link>
                     </Button>
                 )}
-                 {tmdbId && (
+                 {isMovie && movie?.tmdbId && (
                     <Button asChild variant="outline">
-                        <Link href={`https://www.themoviedb.org/movie/${tmdbId}`} target="_blank" rel="noopener noreferrer">
+                        <Link href={`https://www.themoviedb.org/movie/${movie.tmdbId}`} target="_blank" rel="noopener noreferrer">
                             View on TMDb
+                            <ExternalLink className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                )}
+                 {isAnime && anime?.jikanMalId && (
+                    <Button asChild variant="outline">
+                        <Link href={`https://myanimelist.net/anime/${anime.jikanMalId}`} target="_blank" rel="noopener noreferrer">
+                            View on MyAnimeList
                             <ExternalLink className="ml-2 h-4 w-4" />
                         </Link>
                     </Button>

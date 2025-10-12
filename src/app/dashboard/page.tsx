@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Book, Movie } from '@prisma/client';
+import type { Book, Movie, Anime } from '@/lib/types';
 import { Header } from '@/components/header';
 import type { User } from 'next-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BookOpenCheck, Clapperboard, Film, Library, Star } from 'lucide-react';
+import { BookOpenCheck, Clapperboard, Film, Library, Star, Tv } from 'lucide-react';
 import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { BOOK_STATUSES, MOVIE_STATUSES } from '@/lib/types';
+import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES } from '@/lib/types';
 import Link from 'next/link';
 
 const demoUser: User = {
@@ -19,10 +19,12 @@ const demoUser: User = {
 
 const LOCAL_STORAGE_KEY_BOOKS = 'bookverse-library';
 const LOCAL_STORAGE_KEY_MOVIES = 'movieverse-library';
+const LOCAL_STORAGE_KEY_ANIME = 'animeverse-library';
 
 export default function DashboardPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [anime, setAnime] = useState<Anime[]>([]);
 
   useEffect(() => {
     try {
@@ -44,20 +46,31 @@ export default function DashboardPage() {
         }));
         setMovies(parsedMovies);
       }
+      const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
+       if (storedAnime) {
+        const parsedAnime = JSON.parse(storedAnime).map((a: any) => ({
+            ...a,
+            createdAt: new Date(a.createdAt),
+            updatedAt: new Date(a.updatedAt),
+        }));
+        setAnime(parsedAnime);
+      }
     } catch (error) {
       console.error('Failed to parse items from localStorage', error);
       setBooks([]);
       setMovies([]);
+      setAnime([]);
     }
   }, []);
   
-  const allMedia = [...books, ...movies];
+  const allMedia = [...books, ...movies, ...anime];
 
   const totalBooks = books.length;
   const totalMovies = movies.length;
+  const totalAnime = anime.length;
   const completedBooks = books.filter(b => b.status === 'Completed').length;
   const watchedMovies = movies.filter(m => m.status === 'Watched').length;
-  const averageRating = allMedia.reduce((acc, b) => acc + (b.rating || 0), 0) / (allMedia.filter(b => b.rating).length || 1);
+  const watchedAnime = anime.filter(a => a.status === 'Completed').length;
 
   const bookStatusCounts = BOOK_STATUSES.map(status => ({
     name: status,
@@ -68,16 +81,15 @@ export default function DashboardPage() {
     name: status,
     count: movies.filter(m => m.status === status).length,
   }));
-
-  const bookChartData = bookStatusCounts.map(item => ({
-    name: item.name,
-    books: item.count,
+  
+  const animeStatusCounts = ANIME_STATUSES.map(status => ({
+    name: status,
+    count: anime.filter(a => a.status === status).length,
   }));
 
-  const movieChartData = movieStatusCounts.map(item => ({
-    name: item.name,
-    movies: item.count,
-  }));
+  const bookChartData = bookStatusCounts.map(item => ({ name: item.name, books: item.count }));
+  const movieChartData = movieStatusCounts.map(item => ({ name: item.name, movies: item.count }));
+  const animeChartData = animeStatusCounts.map(item => ({ name: item.name, anime: item.count }));
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -91,7 +103,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Books</CardTitle>
@@ -99,7 +111,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalBooks}</div>
-                <p className="text-xs text-muted-foreground">books in your collection</p>
               </CardContent>
             </Card>
              <Card>
@@ -109,7 +120,15 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalMovies}</div>
-                <p className="text-xs text-muted-foreground">movies in your collection</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Anime</CardTitle>
+                <Tv className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalAnime}</div>
               </CardContent>
             </Card>
             <Card>
@@ -119,7 +138,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{completedBooks}</div>
-                <p className="text-xs text-muted-foreground">books you've finished reading</p>
               </CardContent>
             </Card>
              <Card>
@@ -129,42 +147,31 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{watchedMovies}</div>
-                <p className="text-xs text-muted-foreground">movies you've finished watching</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Anime Completed</CardTitle>
+                <Clapperboard className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{watchedAnime}</div>
               </CardContent>
             </Card>
           </div>
 
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
+          <div className="mt-8 grid gap-8 md:grid-cols-1 lg:grid-cols-3">
             <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline'>Book Library Breakdown</CardTitle>
-                    <CardDescription>A look at your books by their status.</CardDescription>
+                    <CardTitle className='font-headline'>Book Library</CardTitle>
+                    <CardDescription>Breakdown by status.</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
                     <ResponsiveContainer width="100%" height={350}>
                     <RechartsBarChart data={bookChartData}>
-                        <XAxis
-                            dataKey="name"
-                            stroke="hsl(var(--muted-foreground))"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                        />
-                        <YAxis
-                            stroke="hsl(var(--muted-foreground))"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                            allowDecimals={false}
-                        />
-                        <Tooltip 
-                            cursor={{ fill: 'hsl(var(--accent))' }}
-                            contentStyle={{ 
-                                background: 'hsl(var(--background))',
-                                border: '1px solid hsl(var(--border))',
-                                borderRadius: 'var(--radius)',
-                            }}
-                        />
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false}/>
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
+                        <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)'}}/>
                         <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
                         <Bar dataKey="books" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                     </RechartsBarChart>
@@ -173,36 +180,35 @@ export default function DashboardPage() {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle className='font-headline'>Movie Library Breakdown</CardTitle>
-                    <CardDescription>A look at your movies by their status.</CardDescription>
+                    <CardTitle className='font-headline'>Movie Library</CardTitle>
+                    <CardDescription>Breakdown by status.</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
                     <ResponsiveContainer width="100%" height={350}>
                     <RechartsBarChart data={movieChartData}>
-                        <XAxis
-                            dataKey="name"
-                            stroke="hsl(var(--muted-foreground))"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                        />
-                        <YAxis
-                            stroke="hsl(var(--muted-foreground))"
-                            fontSize={12}
-                            tickLine={false}
-                            axisLine={false}
-                            allowDecimals={false}
-                        />
-                        <Tooltip 
-                            cursor={{ fill: 'hsl(var(--accent))' }}
-                            contentStyle={{ 
-                                background: 'hsl(var(--background))',
-                                border: '1px solid hsl(var(--border))',
-                                borderRadius: 'var(--radius)',
-                            }}
-                        />
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} />
                         <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
                         <Bar dataKey="movies" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    </RechartsBarChart>
+                    </Responsi
+veContainer>
+              </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className='font-headline'>Anime Library</CardTitle>
+                    <CardDescription>Breakdown by status.</CardDescription>
+                </CardHeader>
+                <CardContent className="pl-2">
+                    <ResponsiveContainer width="100%" height={350}>
+                    <RechartsBarChart data={animeChartData}>
+                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                        <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} />
+                        <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
+                        <Bar dataKey="anime" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                     </RechartsBarChart>
                     </ResponsiveContainer>
               </CardContent>

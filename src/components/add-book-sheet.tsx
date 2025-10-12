@@ -10,13 +10,13 @@ import {
 } from '@/components/ui/sheet';
 import { AddBookForm } from './add-book-form';
 import { useState, useEffect } from 'react';
-import type { Book, Movie } from '@prisma/client';
+import type { Book, Movie, Anime } from '@/lib/types';
 
 type AddBookSheetProps = {
     children?: React.ReactNode;
     onMediaAdded: (mediaData: any) => void;
     onMediaUpdated: (updatedMedia: any) => void;
-    mediaToEdit?: Book | Movie | null;
+    mediaToEdit?: Book | Movie | Anime | null;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 };
@@ -66,7 +66,7 @@ export function AddBookSheet({
           <SheetDescription>
             {isEditMode 
               ? 'Update the details of this item in your library.' 
-              : 'Search for a book or movie to auto-fill details, or enter them manually.'
+              : 'Search for a book, movie, or anime to auto-fill details, or enter them manually.'
             }
           </SheetDescription>
         </SheetHeader>
