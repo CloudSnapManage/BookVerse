@@ -101,13 +101,13 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
               </div>
               
               <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onEdit(media)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 bg-black/20 text-white/80 hover:bg-black/40 hover:text-white" onClick={() => onEdit(media)}>
                   <Edit className="h-4 w-4" />
                   <span className="sr-only">Edit</span>
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 bg-black/20 text-white/80 hover:bg-destructive/80 hover:text-destructive-foreground">
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Delete</span>
                       </Button>
@@ -126,7 +126,7 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                   </AlertDialogContent>
                 </AlertDialog>
                 {externalLink && (
-                  <Button asChild variant="outline" size="icon" className='h-8 w-8'>
+                  <Button asChild variant="ghost" size="icon" className='h-8 w-8 bg-black/20 text-white/80 hover:bg-black/40 hover:text-white'>
                       <Link href={externalLink} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-4 w-4" />
                           <span className='sr-only'>{externalLinkText}</span>
