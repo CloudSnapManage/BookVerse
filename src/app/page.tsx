@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
 import type { User } from 'next-auth';
 import { BookDetailsDialog } from '@/components/book-details-dialog';
+import { TopLoader } from '@/components/top-loader';
 
 const demoUser: User = {
   id: 'clx1v2q2y000012b1a51a1b1a',
@@ -18,7 +19,7 @@ const demoUser: User = {
 
 function BookListSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} className="flex flex-col space-y-3">
           <Skeleton className="h-[300px] w-full rounded-lg" />
@@ -42,23 +43,23 @@ export default function AppHomePage() {
   // Load books from localStorage on initial render
   useEffect(() => {
     try {
-      const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (storedBooks) {
-        setBooks(JSON.parse(storedBooks));
-      }
+      // Simulate a small delay for the loading bar effect
+      setTimeout(() => {
+        const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (storedBooks) {
+          setBooks(JSON.parse(storedBooks));
+        }
+        setLoading(false);
+      }, 700);
     } catch (error) {
       console.error('Failed to parse books from localStorage', error);
-      // If parsing fails, start with an empty library
       setBooks([]);
-    } finally {
       setLoading(false);
     }
   }, []);
 
   // Save books to localStorage whenever they change
   useEffect(() => {
-    // We don't want to save the initial empty array on first render
-    // before we've had a chance to load from storage.
     if (!loading) {
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(books));
@@ -85,6 +86,7 @@ export default function AppHomePage() {
 
   return (
     <>
+      {loading && <TopLoader />}
       <div className="flex min-h-screen w-full flex-col bg-background">
         <Header user={demoUser} onBookAdded={handleBookAdded} />
         <main className="flex-1">
@@ -111,6 +113,7 @@ export default function AppHomePage() {
             setSelectedBook(null);
           }
         }}
+        onBookUpdated={() => { /* This can be implemented later */ }}
       />
     </>
   );
