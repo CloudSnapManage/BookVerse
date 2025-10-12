@@ -109,13 +109,13 @@ export default function DashboardPage() {
       <main className="flex-1">
         <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
           <div className="mb-8 flex items-center justify-between">
-            <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">My Dashboard</h1>
+            <h1 className="font-headline text-2xl font-bold tracking-tight md:text-4xl">My Dashboard</h1>
             <Link href="/" className="text-sm text-primary hover:underline">
               &larr; Back to Library
             </Link>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-4 xl:grid-cols-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Books</CardTitle>

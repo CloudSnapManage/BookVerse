@@ -14,10 +14,10 @@ import { AddBookSheet } from '@/components/add-book-sheet';
 
 function MediaListSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} className="flex flex-col space-y-3">
-          <Skeleton className="h-[300px] w-full rounded-lg" />
+          <Skeleton className="h-[250px] sm:h-[300px] w-full rounded-lg" />
           <div className="space-y-2">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
@@ -191,7 +191,7 @@ export default function AppHomePage() {
           <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
             <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">My Library</h1>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                 <LibraryControls 
                   filter={filter} 
                   onFilterChange={setFilter}

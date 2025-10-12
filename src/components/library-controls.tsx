@@ -38,11 +38,11 @@ type LibraryControlsProps = {
 
 export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: LibraryControlsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
       {/* Sort Control */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="shrink-0">
+          <Button variant="outline" className="shrink-0 w-full sm:w-auto">
             <ArrowUpDown className="mr-2 h-4 w-4" />
             Sort
           </Button>
@@ -69,7 +69,7 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
       {/* Filter Control */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="shrink-0">
+          <Button variant="outline" className="shrink-0 w-full sm:w-auto">
             <ListFilter className="mr-2 h-4 w-4" />
             Filter
           </Button>
