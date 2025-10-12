@@ -9,6 +9,7 @@ export type Anime = Omit<PrismaMovie, 'mediaType'> & {
     mediaType: 'Anime',
     episodes?: number | null;
     jikanMalId?: number | null;
+    favoriteEpisode?: string | null;
 };
 
 

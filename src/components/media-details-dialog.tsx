@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
-import { Star, ExternalLink, Trash2, Edit, X, Tv } from 'lucide-react';
+import { Star, ExternalLink, Trash2, Edit, X, Tv, Heart } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
@@ -133,6 +133,17 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                                 {media.description}
                             </div>
                         </div>
+                    )}
+                    {isAnime && anime?.favoriteEpisode && (
+                      <div>
+                        <h4 className="font-headline text-lg font-semibold mb-2 flex items-center gap-2">
+                          <Heart className="h-5 w-5 text-primary" />
+                          Favorite Episode
+                        </h4>
+                        <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none bg-muted/20 p-4 rounded-md">
+                            {anime.favoriteEpisode}
+                        </div>
+                      </div>
                     )}
                     <div>
                         <h4 className="font-headline text-lg font-semibold mb-2">My Notes</h4>

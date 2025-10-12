@@ -29,6 +29,7 @@ const formSchema = z.object({
   // Anime specific
   episodes: z.number().optional(),
   jikanMalId: z.number().optional(),
+  favoriteEpisode: z.string().optional(),
 
   // Common
   mediaType: z.enum(['Book', 'Movie', 'Anime']),
@@ -95,6 +96,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             openLibraryId: undefined,
             tmdbId: undefined,
             jikanMalId: undefined,
+            favoriteEpisode: '',
             mediaType: 'Book',
         });
         setActiveMediaType('Book');
@@ -171,7 +173,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         finalData = {
           ...commonData,
           episodes: values.episodes,
-          jikanMalId: values.jikanMalId
+          jikanMalId: values.jikanMalId,
+          favoriteEpisode: values.favoriteEpisode,
         }
       }
 
@@ -229,6 +232,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             />
           )}
           {currentMediaType === 'Anime' && (
+            <>
              <FormField
                 control={form.control}
                 name="episodes"
@@ -241,7 +245,19 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                         <FormMessage />
                     </FormItem>
                 )}
-            />
+              />
+              <FormField
+                control={form.control}
+                name="favoriteEpisode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Favorite Episode (Optional)</FormLabel>
+                    <FormControl><Input placeholder="e.g., Episode 10: The Turning Point" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
           <div className="grid grid-cols-2 gap-4">
             <FormField
