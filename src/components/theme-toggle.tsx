@@ -14,10 +14,13 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
-const themes = [
+const THEMES = [
     { name: 'Slate', value: 'slate' },
     { name: 'Zinc', value: 'zinc' },
     { name: 'Rose', value: 'rose' },
@@ -26,8 +29,8 @@ const themes = [
 ];
 
 export function ThemeToggle() {
-  const { theme, setTheme, themes: availableThemes } = useTheme()
-
+  const { setTheme, resolvedTheme, theme } = useTheme();
+  
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => {
     setMounted(true)
@@ -36,21 +39,21 @@ export function ThemeToggle() {
   if (!mounted) {
     return <Button variant="ghost" size="icon" disabled><Sun className="h-[1.2rem] w-[1.2rem]" /></Button>
   }
-
-  const currentThemeBase = theme?.split('-')[0] || 'slate';
-  const isDarkMode = theme?.includes('dark');
+  
+  const currentBaseTheme = theme?.replace('dark-', '') || 'slate';
+  const isDarkMode = resolvedTheme?.startsWith('dark');
 
   const setMode = (mode: 'light' | 'dark' | 'system') => {
     if (mode === 'system') {
         setTheme('system');
         return;
     }
-    const newTheme = mode === 'dark' ? `${currentThemeBase}-dark` : currentThemeBase.replace('-dark','');
+    const newTheme = mode === 'dark' ? `dark-${currentBaseTheme}` : currentBaseTheme;
     setTheme(newTheme);
   }
 
   const setColorTheme = (color: string) => {
-    const newTheme = isDarkMode ? `${color}-dark` : color;
+    const newTheme = isDarkMode ? `dark-${color}` : color;
     setTheme(newTheme);
   }
 
@@ -64,48 +67,36 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme(currentThemeBase.replace('-dark',''))}>
-          <Sun className="mr-2 h-4 w-4" />
-          <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme(`${currentThemeBase}-dark`)}>
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-            <Sun className="mr-2 h-4 w-4" /> {/* Or a different icon for system */}
-            <span>System</span>
-        </DropdownMenuItem>
+        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+        <DropdownMenuRadioGroup 
+            value={isDarkMode ? 'dark' : 'light'} 
+            onValueChange={(v) => setMode(v as 'light' | 'dark')}
+        >
+            <DropdownMenuRadioItem value="light">
+                <Sun className="mr-2 h-4 w-4" />
+                <span>Light</span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">
+                <Moon className="mr-2 h-4 w-4" />
+                <span>Dark</span>
+            </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-                <Palette className="mr-2 h-4 w-4" />
-                <span>Theme</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                    {themes.map((themeOption) => {
-                        const baseTheme = theme?.split('-')[0];
-                        return (
-                            <DropdownMenuItem 
-                                key={themeOption.value} 
-                                onClick={() => {
-                                    const isDark = theme?.endsWith('-dark');
-                                    setTheme(isDark ? `${themeOption.value}-dark` : themeOption.value);
-                                }}
-                                className={cn(
-                                    "justify-between",
-                                    baseTheme === themeOption.value && "bg-accent"
-                                )}
-                            >
-                                <span>{themeOption.name}</span>
-                                {baseTheme === themeOption.value && <Check className="h-4 w-4" />}
-                            </DropdownMenuItem>
-                        )
-                    })}
-                </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-        </DropdownMenuSub>
+         <DropdownMenuLabel>Theme</DropdownMenuLabel>
+         <DropdownMenuRadioGroup
+            value={currentBaseTheme}
+            onValueChange={setColorTheme}
+         >
+            {THEMES.map((themeOption) => (
+                <DropdownMenuRadioItem 
+                    key={themeOption.value} 
+                    value={themeOption.value}
+                >
+                    <div className='mr-2 h-4 w-4 rounded-full' style={{backgroundColor: `hsl(var(--primary))`}} />
+                    <span>{themeOption.name}</span>
+                </DropdownMenuRadioItem>
+            ))}
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

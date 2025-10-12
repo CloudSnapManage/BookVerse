@@ -28,7 +28,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="slate"
           enableSystem
-          themes={['slate', 'zinc', 'rose', 'violet', 'green']}
+          themes={['slate', 'dark-slate', 'zinc', 'dark-zinc', 'rose', 'dark-rose', 'violet', 'dark-violet', 'green', 'dark-green']}
         >
           {children}
           <Toaster />
