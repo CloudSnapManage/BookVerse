@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { AddMediaSheet } from './add-media-sheet';
+import { AddBookSheet } from './add-book-sheet';
 import { Button } from './ui/button';
 import type { Book, Movie } from '@prisma/client';
 
@@ -10,11 +10,11 @@ type AddMediaButtonProps = {
 
 export function AddMediaButton({ onMediaAdded, children }: AddMediaButtonProps) {
   return (
-    <AddMediaSheet onMediaAdded={onMediaAdded} onMediaUpdated={() => {}}>
+    <AddBookSheet onMediaAdded={onMediaAdded} onMediaUpdated={() => {}}>
       <Button>
         <Plus className="mr-2 h-4 w-4" />
         {children || 'Add Media'}
       </Button>
-    </AddMediaSheet>
+    </AddBookSheet>
   );
 }

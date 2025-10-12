@@ -12,7 +12,7 @@ import { TopLoader } from '@/components/top-loader';
 import { LibraryControls } from '@/components/library-controls';
 import type { BookStatus, MovieStatus } from '@/lib/types';
 import type { SortOption } from '@/components/library-controls';
-import { AddMediaSheet } from '@/components/add-media-sheet';
+import { AddBookSheet } from '@/components/add-book-sheet';
 
 const demoUser: User = {
   id: 'clx1v2q2y000012b1a51a1b1a',
@@ -198,7 +198,7 @@ export default function AppHomePage() {
         </main>
       </div>
 
-      <AddMediaSheet 
+      <AddBookSheet 
         open={!!editingMedia}
         onOpenChange={(isOpen) => !isOpen && setEditingMedia(null)}
         mediaToEdit={editingMedia}
