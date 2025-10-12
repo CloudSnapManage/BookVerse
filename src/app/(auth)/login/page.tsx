@@ -1,5 +1,6 @@
 import { LoginForm } from '@/components/auth/login-form';
 import { AppLogo } from '@/components/logo';
+import { DebugMenu } from '@/components/debug/debug-menu';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 
@@ -20,6 +21,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
       </div>
+      <DebugMenu />
     </div>
   );
 }
