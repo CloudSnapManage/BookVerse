@@ -1,4 +1,3 @@
-import { signOut as signOutAction } from '@/lib/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { User } from 'next-auth';
 import { LogOut } from 'lucide-react';
+import { signOutAction } from './actions';
 
 export function UserNav({ user }: { user: User }) {
   const initials = user.name
@@ -20,12 +20,7 @@ export function UserNav({ user }: { user: User }) {
     .join('');
 
   return (
-    <form
-      action={async () => {
-        'use server';
-        await signOutAction();
-      }}
-    >
+    <form action={signOutAction}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">

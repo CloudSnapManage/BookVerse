@@ -15,6 +15,7 @@ import { useTransition } from 'react';
 import { addBook } from '@/app/actions';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { Book } from '@prisma/client';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -27,7 +28,11 @@ const formSchema = z.object({
   publishYear: z.number().optional(),
 });
 
-export function AddBookForm({ onBookAdded }: { onBookAdded: () => void }) {
+type AddBookFormProps = {
+    onBookAdded: (bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
+};
+
+export function AddBookForm({ onBookAdded }: AddBookFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
@@ -66,9 +71,9 @@ export function AddBookForm({ onBookAdded }: { onBookAdded: () => void }) {
 
       const result = await addBook(bookData);
 
-      if (result.success) {
+      if (result.success && result.book) {
         toast({ title: 'Success!', description: 'Book added to your library.' });
-        onBookAdded();
+        onBookAdded(result.book);
       } else {
         toast({
           variant: 'destructive',

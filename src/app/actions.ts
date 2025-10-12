@@ -18,7 +18,7 @@ const bookSchema = z.object({
 });
 
 // Hardcoded demo user ID
-const demoUserId = 'demo-user-id';
+const demoUserId = 'clx1v2q2y000012b1a51a1b1a';
 
 export async function addBook(data: z.infer<typeof bookSchema>) {
   const validatedFields = bookSchema.safeParse(data);
@@ -30,18 +30,9 @@ export async function addBook(data: z.infer<typeof bookSchema>) {
     };
   }
 
-  try {
-    await prisma.book.create({
-      data: {
-        ...validatedFields.data,
-        userId: demoUserId,
-      },
-    });
-    
-    revalidatePath('/');
-    return { success: true };
-  } catch (error) {
-    console.error('Failed to add book:', error);
-    return { success: false, error: 'A server error occurred.' };
-  }
+  // This is a simulated action. It doesn't save to a database.
+  console.log('Simulating adding book for user:', demoUserId, validatedFields.data);
+
+  revalidatePath('/');
+  return { success: true, book: validatedFields.data };
 }
