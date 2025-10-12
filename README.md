@@ -4,8 +4,8 @@
 
 BookVerse is a modern, personal web application that lets you manage your book library with ease. Search for any book, add it to your collection under different statuses (Owned, Wishlist, etc.), add personal notes and ratings, and view your entire library on a polished, filterable dashboard.
 
-![BookVerse Screenshot](https://picsum.photos/seed/bookverse-app/1200/800)
-*<p align="center">A preview of the BookVerse dashboard.</p>*
+![BookVerse Screenshot](https://storage.googleapis.com/gemini-studio-user-assets/images/user-assets/e65b7193-41c3-42a9-9524-7f1c1f516801_2024-07-29T10_51_52.378Z.png)
+*<p align="center">A preview of the BookVerse dashboard with the dark violet theme.</p>*
 
 ---
 
