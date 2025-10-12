@@ -3,19 +3,11 @@
 import { useState, useEffect } from 'react';
 import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 import { Header } from '@/components/header';
-import type { User } from 'next-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BookOpenCheck, Clapperboard, Film, Library, Star, Tv, Drama } from 'lucide-react';
+import { BookOpenCheck, Clapperboard, Film, Library, Drama, Tv } from 'lucide-react';
 import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 import Link from 'next/link';
-
-const demoUser: User = {
-  id: 'clx1v2q2y000012b1a51a1b1a',
-  email: 'demo@bookverse.com',
-  name: 'Demo User',
-  image: null,
-};
 
 const LOCAL_STORAGE_KEY_BOOKS = 'bookverse-library';
 const LOCAL_STORAGE_KEY_MOVIES = 'movieverse-library';
@@ -67,7 +59,7 @@ export default function DashboardPage() {
         }));
         setKdramas(parsedKDramas);
       }
-    } catch (error) {
+    } catch (error) => {
       console.error('Failed to parse items from localStorage', error);
       setBooks([]);
       setMovies([]);
@@ -115,7 +107,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <Header user={demoUser} />
+      <Header />
       <main className="flex-1">
         <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
           <div className="mb-8 flex items-center justify-between">

@@ -6,20 +6,12 @@ import { MediaGrid } from '@/components/media-grid';
 import { AddMediaButton } from '@/components/add-media-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
-import type { User } from 'next-auth';
 import { MediaDetailsDialog } from '@/components/media-details-dialog';
 import { TopLoader } from '@/components/top-loader';
 import { LibraryControls } from '@/components/library-controls';
 import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
 import type { SortOption } from '@/components/library-controls';
 import { AddBookSheet } from '@/components/add-book-sheet';
-
-const demoUser: User = {
-  id: 'clx1v2q2y000012b1a51a1b1a',
-  email: 'demo@bookverse.com',
-  name: 'Demo User',
-  image: null,
-};
 
 function MediaListSkeleton() {
   return (
@@ -130,7 +122,6 @@ export default function AppHomePage() {
     const newItem = {
       ...newMediaData,
       id: new Date().toISOString(), // Temporary unique ID
-      userId: demoUser.id,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -197,7 +188,7 @@ export default function AppHomePage() {
     <>
       {loading && <TopLoader />}
       <div className="flex min-h-screen w-full flex-col bg-background">
-        <Header user={demoUser} />
+        <Header />
         <main className="flex-1">
           <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
             <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
