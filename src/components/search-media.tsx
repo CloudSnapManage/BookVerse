@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Loader2, Search, Book, Film, Tv, Drama } from 'lucide-react';
 import type { NormalizedMedia, MediaType } from '@/lib/types';
 import { Button } from './ui/button';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -86,40 +87,14 @@ export function SearchMedia({
 
   return (
     <div className="relative" ref={searchContainerRef}>
-        <div className="flex gap-2 mb-2">
-            <Button 
-                variant={searchType === 'Book' ? 'secondary' : 'ghost'} 
-                size="sm" 
-                onClick={() => setSearchType('Book')}
-                className='h-8'
-            >
-                <Book className="mr-2 h-4 w-4" /> Books
-            </Button>
-            <Button 
-                variant={searchType === 'Movie' ? 'secondary' : 'ghost'}
-                size="sm" 
-                onClick={() => setSearchType('Movie')}
-                className='h-8'
-            >
-                <Film className="mr-2 h-4 w-4" /> Movies
-            </Button>
-            <Button 
-                variant={searchType === 'Anime' ? 'secondary' : 'ghost'}
-                size="sm" 
-                onClick={() => setSearchType('Anime')}
-                className='h-8'
-            >
-                <Tv className="mr-2 h-4 w-4" /> Anime
-            </Button>
-            <Button 
-                variant={searchType === 'KDrama' ? 'secondary' : 'ghost'}
-                size="sm" 
-                onClick={() => setSearchType('KDrama')}
-                className='h-8'
-            >
-                <Drama className="mr-2 h-4 w-4" /> K-Drama
-            </Button>
-        </div>
+        <Tabs value={searchType} onValueChange={(value) => setSearchType(value as MediaType)} className="mb-2">
+            <TabsList>
+                <TabsTrigger value="Book"><Book className="mr-2 h-4 w-4" />Books</TabsTrigger>
+                <TabsTrigger value="Movie"><Film className="mr-2 h-4 w-4" />Movies</TabsTrigger>
+                <TabsTrigger value="Anime"><Tv className="mr-2 h-4 w-4" />Anime</TabsTrigger>
+                <TabsTrigger value="KDrama"><Drama className="mr-2 h-4 w-4" />K-Drama</TabsTrigger>
+            </TabsList>
+        </Tabs>
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
@@ -162,14 +137,11 @@ export function SearchMedia({
                             {media.publishYear && <p className="text-xs text-muted-foreground mt-1">{media.publishYear}</p>}
                           </>
                       )}
-                      {media.mediaType === 'Movie' && (
-                          <p className="text-sm text-muted-foreground">{media.releaseYear}</p>
+                      {(media.mediaType === 'Movie' || media.mediaType === 'KDrama') && (
+                          <p className="text-sm text-muted-foreground">{(media as NormalizedMovie).releaseYear}</p>
                       )}
                        {media.mediaType === 'Anime' && (
                           <p className="text-sm text-muted-foreground">{media.episodes} episodes</p>
-                      )}
-                      {media.mediaType === 'KDrama' && (
-                          <p className="text-sm text-muted-foreground">{media.releaseYear}</p>
                       )}
                     </div>
                   </button>
