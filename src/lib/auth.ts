@@ -5,6 +5,7 @@ import Resend from 'next-auth/providers/resend';
 import Credentials from 'next-auth/providers/credentials';
 import prisma from './prisma';
 import bcrypt from 'bcryptjs';
+import type { User } from '@prisma/client';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -23,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<User | null> {
         if (!credentials.email || !credentials.password) {
           return null;
         }
@@ -33,18 +34,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           credentials.email === 'demo@bookverse.com' &&
           credentials.password === 'bookverse'
         ) {
-          // You might want to fetch or create a user object that matches your User model
-          // For now, we'll return a basic user object.
-           const demoUser = await prisma.user.upsert({
-            where: { email: 'demo@bookverse.com' },
-            update: {},
-            create: {
-              email: 'demo@bookverse.com',
-              name: 'Demo User',
-              emailVerified: new Date(),
-            },
-          });
-          return demoUser;
+          // Return a user object that satisfies the User type for the session
+          // This user won't be in the database, but it's enough for session management
+          return {
+            id: 'demo-user-id',
+            email: 'demo@bookverse.com',
+            name: 'Demo User',
+            emailVerified: new Date(),
+            image: null,
+            password: null, // No password hash needed for demo user
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
         }
 
         const user = await prisma.user.findUnique({
