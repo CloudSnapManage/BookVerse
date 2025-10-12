@@ -1,11 +1,9 @@
 import type { User } from 'next-auth';
-import type { Book } from '@prisma/client';
 import { AppLogo } from './logo';
 import { UserNav } from './user-nav';
 
 type HeaderProps = {
     user: User;
-    onBookAdded: (bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
 };
 
 export function Header({ user }: HeaderProps) {

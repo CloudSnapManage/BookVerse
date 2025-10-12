@@ -11,11 +11,22 @@ import {
 } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
-import { Star, ExternalLink } from 'lucide-react';
+import { Star, ExternalLink, Trash2, Edit, X } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const defaultCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
 
@@ -23,7 +34,8 @@ type BookDetailsDialogProps = {
   book: Book | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onBookUpdated: (updatedBook: Book) => void;
+  onEdit: (book: Book) => void;
+  onDelete: (bookId: string) => void;
 };
 
 function StarRating({ rating }: { rating: number | null | undefined }) {
@@ -31,18 +43,52 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
     return (
         <div className="flex items-center gap-1">
             {Array.from({ length: 5 }, (_, i) => (
-                <Star key={i} className={`h-5 w-5 ${i < rating ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`} />
+                <Star key={i} className={`h-5 w-5 ${i < rating ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground/30'}`} />
             ))}
         </div>
     );
 }
 
-export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialogProps) {
+export function BookDetailsDialog({ book, open, onOpenChange, onEdit, onDelete }: BookDetailsDialogProps) {
   if (!book) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl grid-cols-1 md:grid-cols-3 grid gap-0 p-0 max-h-[90vh]">
+        
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(book)}>
+            <Edit className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete</span>
+                </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the book
+                  from your library.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(book.id)}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+        </div>
+        
         <div className="md:col-span-1 p-6 flex items-center justify-center bg-muted/30">
           <div className="relative aspect-[2/3] w-full max-w-[300px] h-auto rounded-lg overflow-hidden shadow-2xl group">
              <Image
@@ -54,7 +100,7 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
              />
           </div>
         </div>
-        <div className="md:col-span-2 p-8 flex flex-col">
+        <div className="md:col-span-2 p-8 pt-16 md:pt-8 flex flex-col">
             <DialogHeader className="text-left">
                 <DialogTitle className="font-headline text-3xl mb-1">{book.title}</DialogTitle>
                 <DialogDescription className="text-lg text-muted-foreground">{book.authors.join(', ')}</DialogDescription>
@@ -65,6 +111,14 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
             </div>
             <ScrollArea className="flex-grow my-6 pr-4 -mr-4">
                 <div className="space-y-6">
+                    {book.description && (
+                        <div>
+                            <h4 className="font-headline text-lg font-semibold mb-2">Description</h4>
+                            <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
+                                {book.description}
+                            </div>
+                        </div>
+                    )}
                     <div>
                         <h4 className="font-headline text-lg font-semibold mb-2">My Notes</h4>
                         {book.notes ? (
