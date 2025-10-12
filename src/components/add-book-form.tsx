@@ -21,6 +21,7 @@ const formSchema = z.object({
   // Book specific
   authors: z.string().optional(),
   openLibraryId: z.string().optional(),
+  publishYear: z.number().optional(),
   
   // Movie/Drama specific
   releaseYear: z.number().optional(),
@@ -115,6 +116,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             jikanMalId: undefined,
             favoriteEpisode: '',
             mediaType: 'Book',
+            publishYear: undefined,
         });
         setActiveMediaType('Book');
     }
@@ -187,6 +189,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
           ...commonData,
           authors: values.authors ? values.authors.split(',').map(a => a.trim()) : [],
           openLibraryId: values.openLibraryId,
+          publishYear: values.publishYear,
         }
       } else if (values.mediaType === 'Movie') {
         finalData = {
@@ -350,3 +353,5 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
     </div>
   );
 }
+
+    
