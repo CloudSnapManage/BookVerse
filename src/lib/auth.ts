@@ -28,6 +28,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        // Hardcoded test user
+        if (
+          credentials.email === 'demo@bookverse.com' &&
+          credentials.password === 'bookverse'
+        ) {
+          // You might want to fetch or create a user object that matches your User model
+          // For now, we'll return a basic user object.
+           const demoUser = await prisma.user.upsert({
+            where: { email: 'demo@bookverse.com' },
+            update: {},
+            create: {
+              email: 'demo@bookverse.com',
+              name: 'Demo User',
+              emailVerified: new Date(),
+            },
+          });
+          return demoUser;
+        }
+
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email as string,
