@@ -15,10 +15,16 @@ interface OpenLibraryDoc {
   number_of_pages_median?: number;
   publisher?: string[];
   first_sentence?: string[];
+  edition_key?: string[];
+  by_statement?: string; // Short description can be in this field
 }
 
 function normalizeBook(doc: OpenLibraryDoc): NormalizedBook {
   const workId = doc.key.replace('/works/', '');
+  
+  // Use by_statement or the first sentence as the description.
+  const description = doc.by_statement || doc.first_sentence?.[0];
+
   return {
     openLibraryId: workId,
     title: doc.title,
@@ -29,7 +35,7 @@ function normalizeBook(doc: OpenLibraryDoc): NormalizedBook {
     publishYear: doc.first_publish_year,
     pages: doc.number_of_pages_median,
     publisher: doc.publisher?.[0],
-    description: doc.first_sentence?.[0]
+    description: description,
   };
 }
 
@@ -38,7 +44,7 @@ export async function searchAndNormalizeBooks(query: string, limit = 10): Promis
     params: { 
       q: query, 
       limit,
-      fields: 'key,title,subtitle,author_name,cover_i,isbn,first_publish_year,number_of_pages_median,publisher,first_sentence'
+      fields: 'key,title,subtitle,author_name,cover_i,isbn,first_publish_year,number_of_pages_median,publisher,first_sentence,by_statement,edition_key'
     },
   });
 

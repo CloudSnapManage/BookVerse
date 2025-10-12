@@ -157,7 +157,7 @@ export function AddBookForm({ onBookAdded }: AddBookFormProps) {
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notes</FormLabel>
+                <FormLabel>My Notes</FormLabel>
                 <FormControl><Textarea placeholder="Your thoughts, quotes, or a short review..." {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
