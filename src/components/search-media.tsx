@@ -11,12 +11,22 @@ import { Button } from './ui/button';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export function SearchMedia({ onMediaSelect }: { onMediaSelect: (media: NormalizedMedia) => void }) {
+export function SearchMedia({ 
+    onMediaSelect, 
+    onSearchTypeChange 
+}: { 
+    onMediaSelect: (media: NormalizedMedia) => void,
+    onSearchTypeChange: (type: MediaType) => void,
+}) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [searchType, setSearchType] = useState<MediaType>('Book');
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    onSearchTypeChange(searchType);
+  }, [searchType, onSearchTypeChange]);
 
   const apiUrl =
     debouncedQuery.length >= 3

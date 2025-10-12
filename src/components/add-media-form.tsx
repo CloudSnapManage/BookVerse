@@ -8,112 +8,160 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SearchMedia } from './search-books';
+import { SearchMedia } from './search-media';
 import type { NormalizedMedia } from '@/lib/types';
-import { BOOK_STATUSES } from '@/lib/types';
-import { useEffect, useTransition } from 'react';
+import { BOOK_STATUSES, MOVIE_STATUSES } from '@/lib/types';
+import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Book } from '@prisma/client';
+import type { Book, Movie } from '@prisma/client';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  authors: z.string().min(1, 'Author is required'),
-  status: z.enum(BOOK_STATUSES),
+  // Book specific
+  authors: z.string().optional(),
+  openLibraryId: z.string().optional(),
+  
+  // Movie specific
+  releaseYear: z.number().optional(),
+  tmdbId: z.number().optional(),
+
+  // Common
+  mediaType: z.enum(['Book', 'Movie']),
+  status: z.string(),
   rating: z.number().int().min(0).max(5).optional(),
   notes: z.string().optional(),
   description: z.string().optional(),
   coverUrl: z.string().url().optional().nullable(),
-  openLibraryId: z.string().optional(),
-  publishYear: z.number().optional(),
 });
 
-type AddBookFormProps = {
-    onFormSubmit: (data: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>, bookId?: string) => void;
-    bookToEdit?: Book | null;
+type AddMediaFormProps = {
+    onFormSubmit: (data: any, mediaId?: string) => void;
+    mediaToEdit?: Book | Movie | null;
 };
 
-export function AddBookForm({ onFormSubmit, bookToEdit }: AddBookFormProps) {
+export function AddMediaForm({ onFormSubmit, mediaToEdit }: AddMediaFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const isEditMode = !!bookToEdit;
+  const [activeMediaType, setActiveMediaType] = useState<'Book' | 'Movie'>(mediaToEdit?.mediaType || 'Book');
+  
+  const isEditMode = !!mediaToEdit;
+  
+  const currentStatuses = activeMediaType === 'Book' ? BOOK_STATUSES : MOVIE_STATUSES;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: isEditMode ? {
-      ...bookToEdit,
-      authors: bookToEdit.authors.join(', '),
-      rating: bookToEdit.rating ?? 0,
-    } : {
-      title: '',
-      authors: '',
-      status: 'Wishlist',
-      rating: 0,
-      notes: '',
-      description: '',
-    },
+    defaultValues: {
+        title: '',
+        authors: '',
+        status: activeMediaType === 'Book' ? 'Wishlist' : 'Watched',
+        rating: 0,
+        notes: '',
+        description: '',
+        mediaType: activeMediaType,
+      },
   });
 
   useEffect(() => {
-    if (bookToEdit) {
-      form.reset({
-        ...bookToEdit,
-        authors: bookToEdit.authors.join(', '),
-        rating: bookToEdit.rating ?? 0,
-      });
+    if (mediaToEdit) {
+      const editValues: any = {
+        ...mediaToEdit,
+        rating: mediaToEdit.rating ?? 0,
+      }
+      if (mediaToEdit.mediaType === 'Book') {
+        editValues.authors = (mediaToEdit as Book).authors.join(', ');
+      }
+      form.reset(editValues);
+      setActiveMediaType(mediaToEdit.mediaType);
     } else {
         form.reset({
             title: '',
             authors: '',
+            releaseYear: undefined,
             status: 'Wishlist',
             rating: 0,
             notes: '',
             description: '',
             coverUrl: null,
             openLibraryId: undefined,
-            publishYear: undefined
+            tmdbId: undefined,
+            mediaType: 'Book',
         });
+        setActiveMediaType('Book');
     }
-  }, [bookToEdit, form]);
+  }, [mediaToEdit, form]);
   
   const rating = form.watch('rating');
 
   const handleMediaSelect = (media: NormalizedMedia) => {
+    setActiveMediaType(media.mediaType);
     if (media.mediaType === 'Book') {
       form.reset({
         ...form.getValues(),
+        mediaType: 'Book',
         title: media.title,
         authors: media.authors.join(', '),
         coverUrl: media.coverUrl,
         openLibraryId: media.openLibraryId,
         publishYear: media.publishYear,
         description: media.description,
-        status: 'Owned', // Default to Owned when selecting a book
+        status: 'Owned',
       });
+    } else if (media.mediaType === 'Movie') {
+        form.reset({
+            ...form.getValues(),
+            mediaType: 'Movie',
+            title: media.title,
+            coverUrl: media.posterUrl,
+            tmdbId: media.tmdbId,
+            releaseYear: media.releaseYear,
+            description: media.overview,
+            status: 'Watched',
+        });
     }
-    // TODO: Handle Movie selection
   };
+  
+  const currentMediaType = form.watch('mediaType');
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     startTransition(() => {
-      const bookData = {
-        ...values,
-        authors: values.authors.split(',').map(a => a.trim()),
+      const commonData = {
+        title: values.title,
+        status: values.status,
         rating: values.rating === 0 ? null : values.rating,
+        notes: values.notes,
+        description: values.description,
+        coverUrl: values.coverUrl,
+        mediaType: values.mediaType,
       };
 
-      onFormSubmit(bookData, bookToEdit?.id);
+      let finalData;
+      if (values.mediaType === 'Book') {
+        finalData = {
+          ...commonData,
+          authors: values.authors ? values.authors.split(',').map(a => a.trim()) : [],
+          openLibraryId: values.openLibraryId,
+        }
+      } else { // Movie
+        finalData = {
+            ...commonData,
+            releaseYear: values.releaseYear,
+            tmdbId: values.tmdbId,
+        }
+      }
+
+      onFormSubmit(finalData, mediaToEdit?.id);
 
       toast({ 
-        title: isEditMode ? 'Book Updated!' : 'Book Added!',
-        description: `${bookData.title} has been ${isEditMode ? 'updated' : 'added'}.`
+        title: isEditMode ? 'Media Updated!' : 'Media Added!',
+        description: `${finalData.title} has been ${isEditMode ? 'updated' : 'added'}.`
       });
     });
   };
-
+  
   return (
     <div className="space-y-6">
-      {!isEditMode && <SearchMedia onMediaSelect={handleMediaSelect} />}
+      {!isEditMode && <SearchMedia onMediaSelect={handleMediaSelect} onSearchTypeChange={setActiveMediaType} />}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -127,17 +175,34 @@ export function AddBookForm({ onFormSubmit, bookToEdit }: AddBookFormProps) {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="authors"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Author(s)</FormLabel>
-                <FormControl><Input placeholder="J. R. R. Tolkien" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {currentMediaType === 'Book' && (
+            <FormField
+              control={form.control}
+              name="authors"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Author(s)</FormLabel>
+                  <FormControl><Input placeholder="J. R. R. Tolkien" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          {currentMediaType === 'Movie' && (
+             <FormField
+                control={form.control}
+                name="releaseYear"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Release Year</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="2023" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+          )}
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -148,7 +213,7 @@ export function AddBookForm({ onFormSubmit, bookToEdit }: AddBookFormProps) {
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select a status" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {BOOK_STATUSES.map(status => (
+                      {currentStatuses.map(status => (
                         <SelectItem key={status} value={status}>{status}</SelectItem>
                       ))}
                     </SelectContent>

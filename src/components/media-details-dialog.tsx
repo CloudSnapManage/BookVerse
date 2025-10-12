@@ -1,6 +1,6 @@
 'use client';
 
-import type { Book } from '@prisma/client';
+import type { Book, Movie } from '@prisma/client';
 import {
   Dialog,
   DialogContent,
@@ -28,14 +28,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-const defaultCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
+const defaultBookCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
+const defaultMoviePoster = PlaceHolderImages.find(img => img.id === 'default-movie-poster') || defaultBookCover;
 
-type BookDetailsDialogProps = {
-  book: Book | null;
+type MediaDetailsDialogProps = {
+  media: Book | Movie | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (book: Book) => void;
-  onDelete: (bookId: string) => void;
+  onEdit: (media: Book | Movie) => void;
+  onDelete: (mediaId: string) => void;
 };
 
 function StarRating({ rating }: { rating: number | null | undefined }) {
@@ -49,15 +50,24 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
     );
 }
 
-export function BookDetailsDialog({ book, open, onOpenChange, onEdit, onDelete }: BookDetailsDialogProps) {
-  if (!book) return null;
+export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete }: MediaDetailsDialogProps) {
+  if (!media) return null;
+
+  const isBook = media.mediaType === 'Book';
+  const book = isBook ? media as Book : null;
+  const movie = !isBook ? media as Movie : null;
+  
+  const coverUrl = isBook ? book?.coverUrl : movie?.coverUrl;
+  const defaultCover = isBook ? defaultBookCover : defaultMoviePoster;
+  const openLibraryId = isBook ? book?.openLibraryId : null;
+  const tmdbId = !isBook ? movie?.tmdbId : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl grid-cols-1 md:grid-cols-3 grid gap-0 p-0 max-h-[90vh]">
         
         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(book)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(media)}>
             <Edit className="h-4 w-4" />
             <span className="sr-only">Edit</span>
           </Button>
@@ -73,13 +83,12 @@ export function BookDetailsDialog({ book, open, onOpenChange, onEdit, onDelete }
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the book
-                  from your library.
+                  This action cannot be undone. This will permanently delete this item from your library.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(book.id)}>Delete</AlertDialogAction>
+                <AlertDialogAction onClick={() => onDelete(media.id)}>Delete</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -92,8 +101,8 @@ export function BookDetailsDialog({ book, open, onOpenChange, onEdit, onDelete }
         <div className="md:col-span-1 p-6 flex items-center justify-center bg-muted/30">
           <div className="relative aspect-[2/3] w-full max-w-[300px] h-auto rounded-lg overflow-hidden shadow-2xl group">
              <Image
-                src={book.coverUrl || defaultCover?.imageUrl || ''}
-                alt={`Cover of ${book.title}`}
+                src={coverUrl || defaultCover?.imageUrl || ''}
+                alt={`Cover of ${media.title}`}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, 33vw"
@@ -102,43 +111,52 @@ export function BookDetailsDialog({ book, open, onOpenChange, onEdit, onDelete }
         </div>
         <div className="md:col-span-2 p-8 pt-16 md:pt-8 flex flex-col">
             <DialogHeader className="text-left">
-                <DialogTitle className="font-headline text-3xl mb-1">{book.title}</DialogTitle>
-                <DialogDescription className="text-lg text-muted-foreground">{book.authors.join(', ')}</DialogDescription>
+                <DialogTitle className="font-headline text-3xl mb-1">{media.title}</DialogTitle>
+                {isBook && <DialogDescription className="text-lg text-muted-foreground">{book.authors.join(', ')}</DialogDescription>}
             </DialogHeader>
             <div className="flex items-center justify-between mt-6">
-                <Badge variant={book.status === 'Completed' ? 'default' : 'secondary'} className="text-sm py-1 px-3">{book.status}</Badge>
-                <StarRating rating={book.rating} />
+                <Badge variant={media.status === 'Completed' || media.status === 'Watched' ? 'default' : 'secondary'} className="text-sm py-1 px-3">{media.status}</Badge>
+                <StarRating rating={media.rating} />
             </div>
             <ScrollArea className="flex-grow my-6 pr-4 -mr-4">
                 <div className="space-y-6">
-                    {book.description && (
+                    {media.description && (
                         <div>
                             <h4 className="font-headline text-lg font-semibold mb-2">Description</h4>
                             <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
-                                {book.description}
+                                {media.description}
                             </div>
                         </div>
                     )}
                     <div>
                         <h4 className="font-headline text-lg font-semibold mb-2">My Notes</h4>
-                        {book.notes ? (
+                        {media.notes ? (
                           <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none bg-muted/20 p-4 rounded-md">
-                              {book.notes}
+                              {media.notes}
                           </div>
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-2 italic">No notes for this book yet.</p>
+                          <p className="text-sm text-muted-foreground mt-2 italic">No notes for this item yet.</p>
                         )}
                     </div>
                 </div>
             </ScrollArea>
             <DialogFooter className='mt-auto flex-col sm:flex-row items-center justify-between pt-6 border-t'>
                 <span className='text-sm text-muted-foreground self-start sm:self-center'>
-                    {book.publishYear && `Published in ${book.publishYear}`}
+                    {isBook && book?.publishYear && `Published in ${book.publishYear}`}
+                    {!isBook && movie?.releaseYear && `Released in ${movie.releaseYear}`}
                 </span>
-                {book.openLibraryId && (
+                {openLibraryId && (
                     <Button asChild variant="outline">
-                        <Link href={`https://openlibrary.org/works/${book.openLibraryId}`} target="_blank" rel="noopener noreferrer">
+                        <Link href={`https://openlibrary.org/works/${openLibraryId}`} target="_blank" rel="noopener noreferrer">
                             Read More
+                            <ExternalLink className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                )}
+                 {tmdbId && (
+                    <Button asChild variant="outline">
+                        <Link href={`https://www.themoviedb.org/movie/${tmdbId}`} target="_blank" rel="noopener noreferrer">
+                            View on TMDb
                             <ExternalLink className="ml-2 h-4 w-4" />
                         </Link>
                     </Button>

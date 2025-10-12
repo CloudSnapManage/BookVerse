@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { ListFilter, ArrowUpDown } from 'lucide-react';
-import type { BookStatus } from '@/lib/types';
-import { BOOK_STATUSES } from '@/lib/types';
+import type { BookStatus, MovieStatus } from '@/lib/types';
+import { BOOK_STATUSES, MOVIE_STATUSES } from '@/lib/types';
 
 const sortKeys = ['createdAt', 'title', 'rating'] as const;
 type SortKey = typeof sortKeys[number];
@@ -30,8 +30,8 @@ const sortLabels: Record<SortKey, string> = {
 }
 
 type LibraryControlsProps = {
-  filter: BookStatus | 'All';
-  onFilterChange: (filter: BookStatus | 'All') => void;
+  filter: BookStatus | MovieStatus | 'All';
+  onFilterChange: (filter: BookStatus | MovieStatus | 'All') => void;
   sort: SortOption;
   onSortChange: (sort: SortOption) => void;
 };
@@ -76,10 +76,16 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-          <DropdownMenuRadioGroup value={filter} onValueChange={(value) => onFilterChange(value as BookStatus | 'All')}>
+          <DropdownMenuRadioGroup value={filter} onValueChange={(value) => onFilterChange(value as any)}>
             <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
             <DropdownMenuSeparator />
+            <DropdownMenuLabel>Book Statuses</DropdownMenuLabel>
             {BOOK_STATUSES.map(status => (
+                <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Movie Statuses</DropdownMenuLabel>
+            {MOVIE_STATUSES.map(status => (
                 <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>

@@ -8,42 +8,42 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { AddBookForm } from './add-book-form';
+import { AddMediaForm } from './add-media-form';
 import { useState, useEffect } from 'react';
-import type { Book } from '@prisma/client';
+import type { Book, Movie } from '@prisma/client';
 
-type AddBookSheetProps = {
+type AddMediaSheetProps = {
     children?: React.ReactNode;
-    onBookAdded: (bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
-    onBookUpdated: (updatedBook: Book) => void;
-    bookToEdit?: Book | null;
+    onMediaAdded: (mediaData: any) => void;
+    onMediaUpdated: (updatedMedia: any) => void;
+    mediaToEdit?: Book | Movie | null;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 };
 
-export function AddBookSheet({ 
+export function AddMediaSheet({ 
   children, 
-  onBookAdded, 
-  onBookUpdated,
-  bookToEdit,
+  onMediaAdded, 
+  onMediaUpdated,
+  mediaToEdit,
   open: controlledOpen,
   onOpenChange: setControlledOpen
-}: AddBookSheetProps) {
+}: AddMediaSheetProps) {
     const [internalOpen, setInternalOpen] = useState(false);
     const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
 
     const open = isControlled ? controlledOpen : internalOpen;
     const setOpen = isControlled ? setControlledOpen : setInternalOpen;
-    const isEditMode = !!bookToEdit;
+    const isEditMode = !!mediaToEdit;
 
     const handleFormSubmit = (
-        data: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>, 
-        bookId?: string
+        data: any, 
+        mediaId?: string
     ) => {
-        if (bookId && bookToEdit) {
-            onBookUpdated({ ...bookToEdit, ...data });
+        if (mediaId && mediaToEdit) {
+            onMediaUpdated({ ...mediaToEdit, ...data });
         } else {
-            onBookAdded(data);
+            onMediaAdded(data);
         }
         setOpen(false);
     }
@@ -62,16 +62,16 @@ export function AddBookSheet({
       {Trigger}
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="text-left">
-          <SheetTitle className="font-headline text-2xl">{isEditMode ? 'Edit Book' : 'Add a New Book'}</SheetTitle>
+          <SheetTitle className="font-headline text-2xl">{isEditMode ? 'Edit Media' : 'Add New Media'}</SheetTitle>
           <SheetDescription>
             {isEditMode 
-              ? 'Update the details of this book in your library.' 
-              : 'Search for a book to auto-fill details, or enter them manually.'
+              ? 'Update the details of this item in your library.' 
+              : 'Search for a book or movie to auto-fill details, or enter them manually.'
             }
           </SheetDescription>
         </SheetHeader>
         <div className="py-6">
-          <AddBookForm onFormSubmit={handleFormSubmit} bookToEdit={bookToEdit} />
+          <AddMediaForm onFormSubmit={handleFormSubmit} mediaToEdit={mediaToEdit} />
         </div>
       </SheetContent>
     </Sheet>

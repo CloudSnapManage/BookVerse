@@ -11,6 +11,12 @@
       "description": "A placeholder for a book cover.",
       "imageUrl": "https://picsum.photos/seed/bookcover/400/600",
       "imageHint": "book cover"
+    },
+    {
+      "id": "default-movie-poster",
+      "description": "A placeholder for a movie poster.",
+      "imageUrl": "https://picsum.photos/seed/movieposter/400/600",
+      "imageHint": "movie poster"
     }
   ]
 }

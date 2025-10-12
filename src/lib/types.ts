@@ -1,4 +1,8 @@
-import type { Book } from '@prisma/client';
+import type { Book as PrismaBook, Movie as PrismaMovie } from '@prisma/client';
+
+// Add mediaType to Prisma-generated types
+export type Book = PrismaBook & { mediaType: 'Book' };
+export type Movie = PrismaMovie & { mediaType: 'Movie' };
 
 export type MediaType = 'Book' | 'Movie';
 
@@ -26,8 +30,6 @@ export type NormalizedMovie = {
 };
 
 export type NormalizedMedia = NormalizedBook | NormalizedMovie;
-
-export type BookWithUser = Book & { user: { name: string | null } };
 
 export const BOOK_STATUSES = ['Owned', 'Wishlist', 'Loaned', 'Completed'] as const;
 export type BookStatus = typeof BOOK_STATUSES[number];

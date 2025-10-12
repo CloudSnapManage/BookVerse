@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { NormalizedBook } from './types';
+import type { NormalizedBook, NormalizedMedia } from './types';
 
 const OPEN_LIBRARY_API_URL = 'https://openlibrary.org';
 
@@ -25,10 +25,11 @@ interface OpenLibraryWork {
 }
 
 
-function normalizeBook(doc: OpenLibraryDoc): Omit<NormalizedBook, 'description'> {
+function normalizeBook(doc: OpenLibraryDoc): Omit<NormalizedBook, 'description'> & {mediaType: 'Book'} {
   const workId = doc.key.replace('/works/', '');
 
   return {
+    mediaType: 'Book',
     openLibraryId: workId,
     title: doc.title,
     subtitle: doc.subtitle,
@@ -41,7 +42,7 @@ function normalizeBook(doc: OpenLibraryDoc): Omit<NormalizedBook, 'description'>
   };
 }
 
-export async function searchBooks(query: string, limit = 10): Promise<Omit<NormalizedBook, 'description'>[]> {
+export async function searchBooks(query: string, limit = 10): Promise<NormalizedMedia[]> {
   const response = await axios.get(`${OPEN_LIBRARY_API_URL}/search.json`, {
     params: { 
       q: query, 
@@ -54,7 +55,14 @@ export async function searchBooks(query: string, limit = 10): Promise<Omit<Norma
   
   // Deduplicate results by work ID
   const uniqueDocs = Array.from(new Map(docs.map(doc => [doc.key, doc])).values());
-  const normalizedBooks = uniqueDocs.map(normalizeBook);
+  
+  const normalizedBooks = await Promise.all(
+    uniqueDocs.map(async (doc) => {
+      const book = normalizeBook(doc);
+      const description = await getBookDescription(book.openLibraryId);
+      return { ...book, description };
+    })
+  );
 
   return normalizedBooks;
 }

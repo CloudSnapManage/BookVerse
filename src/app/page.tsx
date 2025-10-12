@@ -1,18 +1,18 @@
 'use client';
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
-import type { Book } from '@prisma/client';
-import { BookGrid } from '@/components/book-grid';
-import { AddBookButton } from '@/components/add-book-button';
+import type { Book, Movie } from '@prisma/client';
+import { MediaGrid } from '@/components/media-grid';
+import { AddMediaButton } from '@/components/add-media-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
 import type { User } from 'next-auth';
-import { BookDetailsDialog } from '@/components/book-details-dialog';
+import { MediaDetailsDialog } from '@/components/media-details-dialog';
 import { TopLoader } from '@/components/top-loader';
 import { LibraryControls } from '@/components/library-controls';
-import type { BookStatus } from '@/lib/types';
+import type { BookStatus, MovieStatus } from '@/lib/types';
 import type { SortOption } from '@/components/library-controls';
-import { AddBookSheet } from '@/components/add-book-sheet';
+import { AddMediaSheet } from '@/components/add-media-sheet';
 
 const demoUser: User = {
   id: 'clx1v2q2y000012b1a51a1b1a',
@@ -21,7 +21,7 @@ const demoUser: User = {
   image: null,
 };
 
-function BookListSkeleton() {
+function MediaListSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {Array.from({ length: 10 }).map((_, i) => (
@@ -37,88 +37,107 @@ function BookListSkeleton() {
   );
 }
 
-const LOCAL_STORAGE_KEY = 'bookverse-library';
+const LOCAL_STORAGE_KEY_BOOKS = 'bookverse-library';
+const LOCAL_STORAGE_KEY_MOVIES = 'movieverse-library';
+
 
 export default function AppHomePage() {
-  const [books, setBooks] = useState<Book[]>([]);
+  const [media, setMedia] = useState<(Book | Movie)[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Book | Movie | null>(null);
+  const [editingMedia, setEditingMedia] = useState<Book | Movie | null>(null);
 
-  const [filter, setFilter] = useState<BookStatus | 'All'>('All');
+  const [filter, setFilter] = useState<BookStatus | MovieStatus | 'All'>('All');
   const [sort, setSort] = useState<SortOption>({ key: 'createdAt', direction: 'desc' });
 
-  // Load books from localStorage on initial render
+  // Load items from localStorage on initial render
   useEffect(() => {
     try {
       setTimeout(() => {
-        const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY_BOOKS);
+        const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
+        
+        let allMedia: (Book | Movie)[] = [];
+
         if (storedBooks) {
-          // Make sure dates are parsed correctly
-          const parsedBooks = JSON.parse(storedBooks).map((book: any) => ({
-            ...book,
-            createdAt: new Date(book.createdAt),
-            updatedAt: new Date(book.updatedAt),
+          const parsedBooks = JSON.parse(storedBooks).map((item: any) => ({
+            ...item,
+            mediaType: 'Book',
+            createdAt: new Date(item.createdAt),
+            updatedAt: new Date(item.updatedAt),
           }));
-          setBooks(parsedBooks);
+          allMedia = allMedia.concat(parsedBooks);
         }
+        if (storedMovies) {
+            const parsedMovies = JSON.parse(storedMovies).map((item: any) => ({
+                ...item,
+                mediaType: 'Movie',
+                createdAt: new Date(item.createdAt),
+                updatedAt: new Date(item.updatedAt),
+            }));
+            allMedia = allMedia.concat(parsedMovies);
+        }
+        setMedia(allMedia);
         setLoading(false);
       }, 700);
     } catch (error) {
-      console.error('Failed to parse books from localStorage', error);
-      setBooks([]);
+      console.error('Failed to parse items from localStorage', error);
+      setMedia([]);
       setLoading(false);
     }
   }, []);
 
-  // Save books to localStorage whenever they change
+  // Save items to localStorage whenever they change
   useEffect(() => {
     if (!loading) {
       try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(books));
+        const books = media.filter(item => item.mediaType === 'Book');
+        const movies = media.filter(item => item.mediaType === 'Movie');
+        localStorage.setItem(LOCAL_STORAGE_KEY_BOOKS, JSON.stringify(books));
+        localStorage.setItem(LOCAL_STORAGE_KEY_MOVIES, JSON.stringify(movies));
       } catch (error) {
-        console.error('Failed to save books to localStorage', error);
+        console.error('Failed to save items to localStorage', error);
       }
     }
-  }, [books, loading]);
+  }, [media, loading]);
 
-  const handleBookAdded = (newBookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
-    const newBook: Book = {
-      ...newBookData,
+  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+    const newItem = {
+      ...newMediaData,
       id: new Date().toISOString(), // Temporary unique ID
       userId: demoUser.id,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    setBooks(prevBooks => [newBook, ...prevBooks]);
+    setMedia(prevMedia => [newItem, ...prevMedia]);
   };
   
-  const handleBookUpdated = (updatedBook: Book) => {
-    setBooks(prevBooks =>
-      prevBooks.map(book => (book.id === updatedBook.id ? { ...updatedBook, updatedAt: new Date() } : book))
+  const handleMediaUpdated = (updatedMedia: Book | Movie) => {
+    setMedia(prevMedia =>
+        prevMedia.map(item => (item.id === updatedMedia.id ? { ...updatedMedia, updatedAt: new Date() } : item))
     );
-    setEditingBook(null); // Close edit sheet
-    setSelectedBook(null); // Close details dialog
+    setEditingMedia(null); // Close edit sheet
+    setSelectedMedia(null); // Close details dialog
   };
 
-  const handleBookDeleted = (bookId: string) => {
-    setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
-    setSelectedBook(null);
+  const handleMediaDeleted = (mediaId: string) => {
+    setMedia(prevMedia => prevMedia.filter(item => item.id !== mediaId));
+    setSelectedMedia(null);
   }
 
-  const handleBookSelect = (book: Book) => {
-    setSelectedBook(book);
+  const handleMediaSelect = (item: Book | Movie) => {
+    setSelectedMedia(item);
   };
   
-  const handleEditRequest = (book: Book) => {
-    setSelectedBook(null);
-    setEditingBook(book);
+  const handleEditRequest = (item: Book | Movie) => {
+    setSelectedMedia(null);
+    setEditingMedia(item);
   };
 
-  const filteredAndSortedBooks = useMemo(() => {
-    let filtered = books;
+  const filteredAndSortedMedia = useMemo(() => {
+    let filtered = media;
     if (filter !== 'All') {
-      filtered = books.filter(book => book.status === filter);
+      filtered = media.filter(item => item.status === filter);
     }
 
     return [...filtered].sort((a, b) => {
@@ -129,9 +148,9 @@ export default function AppHomePage() {
       if (key === 'title' || key === 'status') {
         valA = a[key].toLowerCase();
         valB = b[key].toLowerCase();
-      } else if (key === 'authors') {
-        valA = a.authors[0]?.toLowerCase() || '';
-        valB = b.authors[0]?.toLowerCase() || '';
+      } else if (key === 'authors' && a.mediaType === 'Book' && b.mediaType === 'Book') {
+        valA = (a as Book).authors[0]?.toLowerCase() || '';
+        valB = (b as Book).authors[0]?.toLowerCase() || '';
       } else {
         valA = a[key];
         valB = b[key];
@@ -146,7 +165,7 @@ export default function AppHomePage() {
       if (valA > valB) return direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [books, filter, sort]);
+  }, [media, filter, sort]);
 
 
   return (
@@ -165,13 +184,13 @@ export default function AppHomePage() {
                   sort={sort}
                   onSortChange={setSort}
                 />
-                <AddBookButton onBookAdded={handleBookAdded} />
+                <AddMediaButton onMediaAdded={handleMediaAdded} />
               </div>
             </div>
             
             <div className="mt-8">
-              <Suspense fallback={<BookListSkeleton />}>
-                {loading ? <BookListSkeleton /> : <BookGrid books={filteredAndSortedBooks} onBookSelect={handleBookSelect} />}
+              <Suspense fallback={<MediaListSkeleton />}>
+                {loading ? <MediaListSkeleton /> : <MediaGrid media={filteredAndSortedMedia} onMediaSelect={handleMediaSelect} />}
               </Suspense>
             </div>
 
@@ -179,24 +198,24 @@ export default function AppHomePage() {
         </main>
       </div>
 
-      <AddBookSheet 
-        open={!!editingBook}
-        onOpenChange={(isOpen) => !isOpen && setEditingBook(null)}
-        bookToEdit={editingBook}
-        onBookAdded={handleBookAdded}
-        onBookUpdated={handleBookUpdated}
+      <AddMediaSheet 
+        open={!!editingMedia}
+        onOpenChange={(isOpen) => !isOpen && setEditingMedia(null)}
+        mediaToEdit={editingMedia}
+        onMediaAdded={handleMediaAdded}
+        onMediaUpdated={handleMediaUpdated}
       />
       
-      <BookDetailsDialog 
-        book={selectedBook} 
-        open={!!selectedBook} 
+      <MediaDetailsDialog 
+        media={selectedMedia} 
+        open={!!selectedMedia} 
         onOpenChange={(isOpen) => {
           if (!isOpen) {
-            setSelectedBook(null);
+            setSelectedMedia(null);
           }
         }}
         onEdit={handleEditRequest}
-        onDelete={handleBookDeleted}
+        onDelete={handleMediaDeleted}
       />
     </>
   );

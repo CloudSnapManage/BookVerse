@@ -29,7 +29,7 @@ function normalizeMovie(movie: TmdbMovieResult): NormalizedMovie {
 }
 
 export async function searchMovies(query: string, limit = 10): Promise<NormalizedMovie[]> {
-  if (TMDB_API_KEY === 'YOUR_TMDB_API_KEY_HERE') {
+  if (TMDB_API_KEY === 'c87912efaa68162d407e3af1ee66c2ea') {
     console.warn('TMDb API key is not configured. Returning empty results.');
     return [];
   }
