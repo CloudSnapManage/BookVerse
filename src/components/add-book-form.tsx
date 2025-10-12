@@ -83,7 +83,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         rating: 0,
         notes: '',
         description: '',
-        mediaType: activeMediaType,
+        mediaType: 'Book',
+        publishYear: undefined,
       },
   });
 
@@ -139,31 +140,32 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         mediaType: 'Book',
         authors: media.authors.join(', '),
         openLibraryId: media.openLibraryId,
-        publishYear: media.publishYear,
+        publishYear: media.publishYear ?? undefined,
         status: 'Owned',
       });
     } else if (media.mediaType === 'Movie') {
         form.reset({
             ...baseReset,
             mediaType: 'Movie',
-            tmdbId: media.tmdbId,
-            releaseYear: media.releaseYear,
+            tmdbId: media.tmdbId ?? undefined,
+            releaseYear: media.releaseYear ?? undefined,
             status: 'Watched',
         });
     } else if (media.mediaType === 'Anime') {
         form.reset({
             ...baseReset,
             mediaType: 'Anime',
-            jikanMalId: media.jikanMalId,
-            episodes: media.episodes || undefined,
+            jikanMalId: media.jikanMalId ?? undefined,
+            episodes: media.episodes ?? undefined,
             status: 'Watching',
         });
     } else if (media.mediaType === 'KDrama') {
         form.reset({
             ...baseReset,
             mediaType: 'KDrama',
-            tmdbId: media.tmdbId,
-            releaseYear: media.releaseYear,
+            tmdbId: media.tmdbId ?? undefined,
+            releaseYear: media.releaseYear ?? undefined,
+            episodes: media.episodes ?? undefined,
             status: 'Watching',
         });
     }
@@ -240,17 +242,32 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             )}
           />
           {currentMediaType === 'Book' && (
-            <FormField
-              control={form.control}
-              name="authors"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Author(s)</FormLabel>
-                  <FormControl><Input placeholder="J. R. R. Tolkien" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <>
+              <FormField
+                control={form.control}
+                name="authors"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Author(s)</FormLabel>
+                    <FormControl><Input placeholder="J. R. R. Tolkien" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                  control={form.control}
+                  name="publishYear"
+                  render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>Publish Year</FormLabel>
+                          <FormControl>
+                              <Input type="number" placeholder="1954" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
+                          </FormControl>
+                          <FormMessage />
+                      </FormItem>
+                  )}
+              />
+            </>
           )}
           {(currentMediaType === 'Movie' || currentMediaType === 'KDrama') && (
              <FormField
