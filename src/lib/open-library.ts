@@ -14,16 +14,19 @@ interface OpenLibraryDoc {
   first_publish_year?: number;
   number_of_pages_median?: number;
   publisher?: string[];
-  first_sentence?: string[];
+  by_statement?: string; 
   edition_key?: string[];
-  by_statement?: string; // Short description can be in this field
 }
 
-function normalizeBook(doc: OpenLibraryDoc): NormalizedBook {
+// Type for the detailed Work record from Open Library
+interface OpenLibraryWork {
+  description?: string | { type: string; value: string };
+  // Add other work fields if needed in the future
+}
+
+
+function normalizeBook(doc: OpenLibraryDoc): Omit<NormalizedBook, 'description'> {
   const workId = doc.key.replace('/works/', '');
-  
-  // Use by_statement or the first sentence as the description.
-  const description = doc.by_statement || doc.first_sentence?.[0];
 
   return {
     openLibraryId: workId,
@@ -35,16 +38,15 @@ function normalizeBook(doc: OpenLibraryDoc): NormalizedBook {
     publishYear: doc.first_publish_year,
     pages: doc.number_of_pages_median,
     publisher: doc.publisher?.[0],
-    description: description,
   };
 }
 
-export async function searchAndNormalizeBooks(query: string, limit = 10): Promise<NormalizedBook[]> {
+export async function searchBooks(query: string, limit = 10): Promise<Omit<NormalizedBook, 'description'>[]> {
   const response = await axios.get(`${OPEN_LIBRARY_API_URL}/search.json`, {
     params: { 
       q: query, 
       limit,
-      fields: 'key,title,subtitle,author_name,cover_i,isbn,first_publish_year,number_of_pages_median,publisher,first_sentence,by_statement,edition_key'
+      fields: 'key,title,subtitle,author_name,cover_i,isbn,first_publish_year,number_of_pages_median,publisher,by_statement,edition_key'
     },
   });
 
@@ -55,4 +57,22 @@ export async function searchAndNormalizeBooks(query: string, limit = 10): Promis
   const normalizedBooks = uniqueDocs.map(normalizeBook);
 
   return normalizedBooks;
+}
+
+export async function getBookDescription(workId: string): Promise<string | undefined> {
+  if (!workId) return undefined;
+  
+  try {
+    const response = await axios.get<OpenLibraryWork>(`${OPEN_LIBRARY_API_URL}/works/${workId}.json`);
+    const workData = response.data;
+    
+    if (!workData.description) return undefined;
+
+    // The description can be a string or an object with a 'value' property
+    return typeof workData.description === 'string' ? workData.description : workData.description.value;
+
+  } catch (error) {
+    console.error(`Failed to fetch description for workId ${workId}:`, error);
+    return undefined;
+  }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchAndNormalizeBooks } from '@/lib/open-library';
+import { searchBooks } from '@/lib/open-library';
 
 export const runtime = 'edge';
 
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const books = await searchAndNormalizeBooks(query);
+    const books = await searchBooks(query);
 
     return NextResponse.json(books);
   } catch (error) {

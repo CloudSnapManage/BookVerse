@@ -64,17 +64,22 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
                     {book.description && (
                         <div>
                             <h4 className="font-semibold">Description</h4>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
                                 {book.description}
                             </p>
                         </div>
                     )}
-                    <div>
-                        <h4 className="font-semibold">My Notes</h4>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-1">
-                            {book.notes || 'You haven\'t added any notes for this book yet.'}
-                        </p>
-                    </div>
+                    {book.notes && (
+                        <div>
+                            <h4 className="font-semibold">My Notes</h4>
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-1">
+                                {book.notes}
+                            </p>
+                        </div>
+                    )}
+                     {!book.description && !book.notes && (
+                        <p className="text-sm text-muted-foreground">No description or notes for this book yet.</p>
+                     )}
                 </div>
             </ScrollArea>
             <div className='mt-4 text-xs text-muted-foreground pt-4 border-t'>

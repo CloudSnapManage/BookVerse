@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import { Loader2, Search } from 'lucide-react';
 import type { NormalizedBook } from '@/lib/types';
+import { getBookDescription } from '@/lib/open-library';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -16,7 +17,7 @@ export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedB
   const [isFocused, setIsFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const { data: results, error, isLoading } = useSWR<NormalizedBook[]>(
+  const { data: results, error, isLoading } = useSWR<Omit<NormalizedBook, 'description'>[]>(
     debouncedQuery.length >= 3 ? `/api/search/books?q=${encodeURIComponent(debouncedQuery)}` : null,
     fetcher
   );
@@ -38,8 +39,12 @@ export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedB
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (book: NormalizedBook) => {
-    onBookSelect(book);
+  const handleSelect = async (book: Omit<NormalizedBook, 'description'>) => {
+    // Fetch the full description when a book is selected
+    const description = await getBookDescription(book.openLibraryId);
+    
+    onBookSelect({ ...book, description });
+
     setQuery('');
     setIsFocused(false);
   };
