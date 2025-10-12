@@ -59,7 +59,7 @@ export default function DashboardPage() {
         }));
         setKdramas(parsedKDramas);
       }
-    } catch (error) => {
+    } catch (error) {
       console.error('Failed to parse items from localStorage', error);
       setBooks([]);
       setMovies([]);
