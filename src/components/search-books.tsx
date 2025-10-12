@@ -5,22 +5,27 @@ import useSWR from 'swr';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
-import { Loader2, Search } from 'lucide-react';
-import type { NormalizedBook } from '@/lib/types';
-import { getBookDescription } from '@/lib/open-library';
+import { Loader2, Search, Book, Film } from 'lucide-react';
+import type { NormalizedMedia, MediaType } from '@/lib/types';
+import { Button } from './ui/button';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
-export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedBook) => void }) {
+export function SearchMedia({ onMediaSelect }: { onMediaSelect: (media: NormalizedMedia) => void }) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [searchType, setSearchType] = useState<MediaType>('Book');
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const { data: results, error, isLoading } = useSWR<Omit<NormalizedBook, 'description'>[]>(
-    debouncedQuery.length >= 3 ? `/api/search/books?q=${encodeURIComponent(debouncedQuery)}` : null,
-    fetcher
-  );
+  const apiUrl =
+    debouncedQuery.length >= 3
+      ? searchType === 'Book'
+        ? `/api/search/books?q=${encodeURIComponent(debouncedQuery)}`
+        : `/api/search/movies?q=${encodeURIComponent(debouncedQuery)}`
+      : null;
+
+  const { data: results, error, isLoading } = useSWR<NormalizedMedia[]>(apiUrl, fetcher);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -39,23 +44,37 @@ export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedB
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = async (book: Omit<NormalizedBook, 'description'>) => {
-    // Fetch the full description when a book is selected
-    const description = await getBookDescription(book.openLibraryId);
-    
-    onBookSelect({ ...book, description });
-
+  const handleSelect = (media: NormalizedMedia) => {
+    onMediaSelect(media);
     setQuery('');
     setIsFocused(false);
   };
 
   return (
     <div className="relative" ref={searchContainerRef}>
+        <div className="flex gap-2 mb-2">
+            <Button 
+                variant={searchType === 'Book' ? 'secondary' : 'ghost'} 
+                size="sm" 
+                onClick={() => setSearchType('Book')}
+                className='h-8'
+            >
+                <Book className="mr-2 h-4 w-4" /> Books
+            </Button>
+            <Button 
+                variant={searchType === 'Movie' ? 'secondary' : 'ghost'}
+                size="sm" 
+                onClick={() => setSearchType('Movie')}
+                className='h-8'
+            >
+                <Film className="mr-2 h-4 w-4" /> Movies
+            </Button>
+        </div>
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search to add a book..."
+          placeholder={`Search for a ${searchType.toLowerCase()}...`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
@@ -73,22 +92,28 @@ export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedB
             <div className="p-4 text-sm text-destructive">Failed to load results.</div>
           ) : results && results.length > 0 ? (
             <ul>
-              {results.map((book) => (
-                <li key={book.openLibraryId}>
-                  <button type="button" onClick={() => handleSelect(book)} className="w-full text-left p-3 hover:bg-accent transition-colors flex items-start gap-4">
-                    <div className="relative h-20 w-14 flex-shrink-0 rounded-sm overflow-hidden">
+              {results.map((media) => (
+                <li key={media.mediaType === 'Book' ? media.openLibraryId : media.tmdbId}>
+                  <button type="button" onClick={() => handleSelect(media)} className="w-full text-left p-3 hover:bg-accent transition-colors flex items-start gap-4">
+                    <div className="relative h-20 w-14 flex-shrink-0 rounded-sm overflow-hidden bg-muted">
                         <Image
-                            src={book.coverUrl || `https://picsum.photos/seed/${book.openLibraryId}/100/150`}
-                            alt={`Cover of ${book.title}`}
+                            src={(media.mediaType === 'Book' ? media.coverUrl : media.posterUrl) || `https://picsum.photos/seed/${media.mediaType === 'Book' ? media.openLibraryId : media.tmdbId}/100/150`}
+                            alt={`Cover of ${media.title}`}
                             fill
                             className="object-cover"
                             sizes="56px"
                         />
                     </div>
                     <div>
-                      <p className="font-semibold leading-snug">{book.title}</p>
-                      <p className="text-sm text-muted-foreground">{book.authors.join(', ')}</p>
-                      {book.publishYear && <p className="text-xs text-muted-foreground mt-1">{book.publishYear}</p>}
+                      <p className="font-semibold leading-snug">{media.title}</p>
+                      {media.mediaType === 'Book' ? (
+                          <>
+                            <p className="text-sm text-muted-foreground">{media.authors.join(', ')}</p>
+                            {media.publishYear && <p className="text-xs text-muted-foreground mt-1">{media.publishYear}</p>}
+                          </>
+                      ) : (
+                          <p className="text-sm text-muted-foreground">{media.releaseYear}</p>
+                      )}
                     </div>
                   </button>
                 </li>

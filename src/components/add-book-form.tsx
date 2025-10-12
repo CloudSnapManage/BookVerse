@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SearchBooks } from './search-books';
-import type { NormalizedBook } from '@/lib/types';
+import { SearchMedia } from './search-books';
+import type { NormalizedMedia } from '@/lib/types';
 import { BOOK_STATUSES } from '@/lib/types';
 import { useEffect, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
@@ -78,17 +78,20 @@ export function AddBookForm({ onFormSubmit, bookToEdit }: AddBookFormProps) {
   
   const rating = form.watch('rating');
 
-  const handleBookSelect = (book: NormalizedBook) => {
-    form.reset({
-      ...form.getValues(),
-      title: book.title,
-      authors: book.authors.join(', '),
-      coverUrl: book.coverUrl,
-      openLibraryId: book.openLibraryId,
-      publishYear: book.publishYear,
-      description: book.description,
-      status: 'Owned', // Default to Owned when selecting a book
-    });
+  const handleMediaSelect = (media: NormalizedMedia) => {
+    if (media.mediaType === 'Book') {
+      form.reset({
+        ...form.getValues(),
+        title: media.title,
+        authors: media.authors.join(', '),
+        coverUrl: media.coverUrl,
+        openLibraryId: media.openLibraryId,
+        publishYear: media.publishYear,
+        description: media.description,
+        status: 'Owned', // Default to Owned when selecting a book
+      });
+    }
+    // TODO: Handle Movie selection
   };
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -110,7 +113,7 @@ export function AddBookForm({ onFormSubmit, bookToEdit }: AddBookFormProps) {
 
   return (
     <div className="space-y-6">
-      {!isEditMode && <SearchBooks onBookSelect={handleBookSelect} />}
+      {!isEditMode && <SearchMedia onMediaSelect={handleMediaSelect} />}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
