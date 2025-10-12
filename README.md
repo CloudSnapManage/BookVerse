@@ -53,13 +53,19 @@ Follow these instructions to get a local copy of BookVerse up and running.
 
 3.  **Set up environment variables:**
 
-    Create a `.env` file in the root of the project. While no keys are strictly required for the app to run (since it's fully client-side), you can add a TMDb API key to enable movie and K-Drama search.
+    Create a `.env` file in the root of the project. To enable movie and K-Drama search, you will need a TMDb API key.
+    
+    You can get a free API key by creating an account on [The Movie Database (TMDb)](https://www.themoviedb.org/signup).
+
     ```bash
-    cp .env.example .env
+    touch .env
     ```
 
-    Now, fill in the optional variables in your `.env` file:
-    *   `TMDB_READ_ACCESS_TOKEN`: Your read access token from The Movie Database (TMDb) to enable movie/drama search.
+    Now, add your API key to the `.env` file:
+    ```
+    # TMDb API Key (v3 Auth)
+    TMDB_API_KEY="your_tmdb_api_key_goes_here"
+    ```
 
 4.  **Run the development server:**
     ```bash
