@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const tempUserSchema = z.object({
   email: z.string().email(),
@@ -34,6 +35,7 @@ export async function createTempUser(values: z.infer<typeof tempUserSchema>) {
 
     await prisma.user.create({
       data: {
+        id: uuidv4(),
         email,
         password: hashedPassword,
         name: `Temp ${email.split('@')[0]}`,
