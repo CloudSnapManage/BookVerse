@@ -2,9 +2,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import prisma from '@/lib/prisma';
 import { BOOK_STATUSES } from '@/lib/types';
-import { auth } from '@/lib/auth';
 
 const bookSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -34,5 +32,8 @@ export async function addBook(data: z.infer<typeof bookSchema>) {
   console.log('Simulating adding book for user:', demoUserId, validatedFields.data);
 
   revalidatePath('/');
-  return { success: true, book: validatedFields.data };
+  return { success: true, book: {
+    ...validatedFields.data,
+    description: validatedFields.data.notes, // Add description for detail view
+  } };
 }

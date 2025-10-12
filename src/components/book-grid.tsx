@@ -2,7 +2,12 @@ import type { Book } from '@prisma/client';
 import { BookCard } from './book-card';
 import { BookHeart } from 'lucide-react';
 
-export function BookGrid({ books }: { books: Book[] }) {
+type BookGridProps = {
+    books: Book[];
+    onBookSelect: (book: Book) => void;
+}
+
+export function BookGrid({ books, onBookSelect }: BookGridProps) {
   if (books.length === 0) {
     return (
         <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-12 text-center">
@@ -16,7 +21,7 @@ export function BookGrid({ books }: { books: Book[] }) {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {books.map((book) => (
-        <BookCard key={book.id} book={book} />
+        <BookCard key={book.id} book={book} onSelect={onBookSelect} />
       ))}
     </div>
   );

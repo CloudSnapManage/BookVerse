@@ -18,9 +18,17 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
     );
 }
 
-export function BookCard({ book }: { book: Book }) {
+type BookCardProps = {
+    book: Book;
+    onSelect: (book: Book) => void;
+}
+
+export function BookCard({ book, onSelect }: BookCardProps) {
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-lg">
+    <Card 
+        className="overflow-hidden transition-shadow hover:shadow-lg cursor-pointer"
+        onClick={() => onSelect(book)}
+    >
       <CardContent className="p-0">
         <div className="relative aspect-[2/3] w-full">
           <Image

@@ -7,6 +7,7 @@ import { AddBookButton } from '@/components/add-book-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
 import type { User } from 'next-auth';
+import { BookDetailsDialog } from '@/components/book-details-dialog';
 
 const demoUser: User = {
   id: 'clx1v2q2y000012b1a51a1b1a',
@@ -14,10 +15,6 @@ const demoUser: User = {
   name: 'Demo User',
   image: null,
 };
-
-function BookList({ books }: { books: Book[] }) {
-  return <BookGrid books={books} />;
-}
 
 function BookListSkeleton() {
   return (
@@ -38,6 +35,7 @@ function BookListSkeleton() {
 export default function AppHomePage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   // Simulate fetching books
   useEffect(() => {
@@ -53,28 +51,43 @@ export default function AppHomePage() {
       userId: demoUser.id,
       createdAt: new Date(),
       updatedAt: new Date(),
+      description: newBookData.notes || 'No description provided.',
     };
     setBooks(prevBooks => [newBook, ...prevBooks]);
   };
 
+  const handleBookSelect = (book: Book) => {
+    setSelectedBook(book);
+  };
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <Header user={demoUser} onBookAdded={handleBookAdded} />
-      <main className="flex-1">
-        <div className="container mx-auto py-8 px-4">
-          <div className="flex items-center justify-between">
-            <h1 className="font-headline text-3xl font-bold">My Library</h1>
-          </div>
-          
-          <div className="mt-8">
-            <Suspense fallback={<BookListSkeleton />}>
-              {loading ? <BookListSkeleton /> : <BookGrid books={books} />}
-            </Suspense>
-          </div>
+    <>
+      <div className="flex min-h-screen w-full flex-col">
+        <Header user={demoUser} onBookAdded={handleBookAdded} />
+        <main className="flex-1">
+          <div className="container mx-auto py-8 px-4">
+            <div className="flex items-center justify-between">
+              <h1 className="font-headline text-3xl font-bold">My Library</h1>
+            </div>
+            
+            <div className="mt-8">
+              <Suspense fallback={<BookListSkeleton />}>
+                {loading ? <BookListSkeleton /> : <BookGrid books={books} onBookSelect={handleBookSelect} />}
+              </Suspense>
+            </div>
 
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+      <BookDetailsDialog 
+        book={selectedBook} 
+        open={!!selectedBook} 
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedBook(null);
+          }
+        }}
+      />
+    </>
   );
 }
