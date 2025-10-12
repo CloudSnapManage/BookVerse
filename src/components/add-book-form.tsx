@@ -23,6 +23,7 @@ const formSchema = z.object({
   status: z.enum(BOOK_STATUSES),
   rating: z.number().int().min(0).max(5).optional(),
   notes: z.string().optional(),
+  description: z.string().optional(),
   coverUrl: z.string().url().optional().nullable(),
   openLibraryId: z.string().optional(),
   publishYear: z.number().optional(),
@@ -44,6 +45,7 @@ export function AddBookForm({ onBookAdded }: AddBookFormProps) {
       status: 'Wishlist',
       rating: 0,
       notes: '',
+      description: '',
     },
   });
   
@@ -57,6 +59,7 @@ export function AddBookForm({ onBookAdded }: AddBookFormProps) {
       coverUrl: book.coverUrl,
       openLibraryId: book.openLibraryId,
       publishYear: book.publishYear,
+      description: book.description,
       status: 'Owned', // Default to Owned when selecting a book
     });
   };

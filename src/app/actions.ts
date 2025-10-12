@@ -10,6 +10,7 @@ const bookSchema = z.object({
   status: z.enum(BOOK_STATUSES),
   rating: z.number().int().min(0).max(5).nullable(),
   notes: z.string().optional(),
+  description: z.string().optional(),
   coverUrl: z.string().url().optional().nullable(),
   openLibraryId: z.string().optional(),
   publishYear: z.number().optional(),
@@ -36,7 +37,6 @@ export async function addBook(data: z.infer<typeof bookSchema>) {
     success: true, 
     book: {
         ...validatedFields.data,
-        description: validatedFields.data.notes || '', // Use notes as description
     } 
   };
 }
