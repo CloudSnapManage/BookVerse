@@ -2,6 +2,7 @@ import type {Config} from 'tailwindcss';
 const { fontFamily } = require("tailwindcss/defaultTheme")
 
 export default {
+  darkMode: "class",
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -95,19 +96,10 @@ export default {
             height: '0',
           },
         },
-        'shimmer': {
-          '0%': {
-            'background-position': '-200% 0',
-          },
-          '100%': {
-            'background-position': '200% 0',
-          },
-        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'shimmer': 'shimmer 2s linear infinite',
       },
       typography: (theme: any) => ({
         DEFAULT: {
