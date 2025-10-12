@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { ListFilter, ArrowUpDown } from 'lucide-react';
-import type { BookStatus, MovieStatus, AnimeStatus } from '@/lib/types';
-import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES } from '@/lib/types';
+import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
+import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 
 const sortKeys = ['createdAt', 'title', 'rating'] as const;
 type SortKey = typeof sortKeys[number];
@@ -30,8 +30,8 @@ const sortLabels: Record<SortKey, string> = {
 }
 
 type LibraryControlsProps = {
-  filter: BookStatus | MovieStatus | AnimeStatus | 'All';
-  onFilterChange: (filter: BookStatus | MovieStatus | AnimeStatus | 'All') => void;
+  filter: BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All';
+  onFilterChange: (filter: BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All') => void;
   sort: SortOption;
   onSortChange: (sort: SortOption) => void;
 };
@@ -91,6 +91,11 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Anime Statuses</DropdownMenuLabel>
             {ANIME_STATUSES.map(status => (
+                <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+            ))}
+             <DropdownMenuSeparator />
+            <DropdownMenuLabel>K-Drama Statuses</DropdownMenuLabel>
+            {KDRAMA_STATUSES.map(status => (
                 <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>

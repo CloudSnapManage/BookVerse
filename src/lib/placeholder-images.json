@@ -23,6 +23,12 @@
       "description": "A placeholder for an anime poster.",
       "imageUrl": "https://picsum.photos/seed/animeposter/400/600",
       "imageHint": "anime poster"
+    },
+    {
+      "id": "default-kdrama-poster",
+      "description": "A placeholder for a drama poster.",
+      "imageUrl": "https://picsum.photos/seed/dramaposter/400/600",
+      "imageHint": "drama poster"
     }
   ]
 }

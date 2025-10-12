@@ -1,10 +1,10 @@
 import { Plus } from 'lucide-react';
 import { AddBookSheet } from './add-book-sheet';
 import { Button } from './ui/button';
-import type { Book, Movie, Anime } from '@/lib/types';
+import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 
 type AddMediaButtonProps = {
-    onMediaAdded: (mediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
+    onMediaAdded: (mediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<KDrama, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
     children?: React.ReactNode;
 };
 

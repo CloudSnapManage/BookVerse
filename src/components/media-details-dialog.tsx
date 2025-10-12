@@ -1,6 +1,6 @@
 'use client';
 
-import type { Book, Movie, Anime } from '@/lib/types';
+import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -32,13 +32,14 @@ import { cn } from '@/lib/utils';
 const defaultBookCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
 const defaultMoviePoster = PlaceHolderImages.find(img => img.id === 'default-movie-poster') || defaultBookCover;
 const defaultAnimePoster = PlaceHolderImages.find(img => img.id === 'default-anime-poster') || defaultBookCover;
+const defaultKDramaPoster = PlaceHolderImages.find(img => img.id === 'default-kdrama-poster') || defaultBookCover;
 
 
 type MediaDetailsDialogProps = {
-  media: Book | Movie | Anime | null;
+  media: Book | Movie | Anime | KDrama | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (media: Book | Movie | Anime) => void;
+  onEdit: (media: Book | Movie | Anime | KDrama) => void;
   onDelete: (mediaId: string) => void;
 };
 
@@ -59,22 +60,27 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
   const isBook = media.mediaType === 'Book';
   const isMovie = media.mediaType === 'Movie';
   const isAnime = media.mediaType === 'Anime';
+  const isKDrama = media.mediaType === 'KDrama';
   
   const coverUrl = media.coverUrl;
   let defaultCover = defaultBookCover;
   if (isMovie) defaultCover = defaultMoviePoster;
   if (isAnime) defaultCover = defaultAnimePoster;
+  if (isKDrama) defaultCover = defaultKDramaPoster;
 
   const book = isBook ? media as Book : null;
   const movie = isMovie ? media as Movie : null;
   const anime = isAnime ? media as Anime : null;
+  const kdrama = isKDrama ? media as KDrama : null;
 
   const externalLink = isBook && book?.openLibraryId ? `https://openlibrary.org/works/${book.openLibraryId}`
-    : isMovie && movie?.tmdbId ? `https://www.themoviedb.org/movie/${movie.tmdbId}`
+    : (isMovie || isKDrama) && (media as Movie)?.tmdbId ? `https://www.themoviedb.org/${isMovie ? 'movie' : 'tv'}/${(media as Movie).tmdbId}`
     : isAnime && anime?.jikanMalId ? `https://myanimelist.net/anime/${anime.jikanMalId}`
     : null;
 
-  const externalLinkText = isBook ? 'View on Open Library' : isMovie ? 'View on TMDb' : 'View on MyAnimeList';
+  const externalLinkText = isBook ? 'View on Open Library' 
+    : (isMovie || isKDrama) ? 'View on TMDb' 
+    : 'View on MyAnimeList';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,8 +102,8 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
               <div>
                 <DialogTitle className="font-headline text-3xl mb-1 drop-shadow-md text-foreground">{media.title}</DialogTitle>
                 {isBook && <DialogDescription className="text-lg text-muted-foreground drop-shadow">{book.authors.join(', ')}</DialogDescription>}
-                {(isMovie && movie?.releaseYear) && <DialogDescription className="text-lg text-muted-foreground drop-shadow">{movie.releaseYear}</DialogDescription>}
-                {(isAnime && anime?.episodes) && <DialogDescription className="text-lg text-muted-foreground drop-shadow flex items-center gap-2"><Tv className="h-5 w-5" /> {anime.episodes} episodes</DialogDescription>}
+                {(isMovie || isKDrama) && (media as Movie)?.releaseYear && <DialogDescription className="text-lg text-muted-foreground drop-shadow">{(media as Movie).releaseYear}</DialogDescription>}
+                {(isAnime || isKDrama) && (media as Anime | KDrama)?.episodes && <DialogDescription className="text-lg text-muted-foreground drop-shadow flex items-center gap-2"><Tv className="h-5 w-5" /> {(media as Anime | KDrama).episodes} episodes</DialogDescription>}
               </div>
               
               <div className="flex items-center gap-1">
@@ -171,14 +177,14 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                               </div>
                           </div>
                       )}
-                      {isAnime && anime?.favoriteEpisode && (
+                      {(isAnime || isKDrama) && (media as Anime | KDrama)?.favoriteEpisode && (
                         <div>
                           <h4 className="font-headline text-lg font-semibold mb-2 flex items-center gap-2">
                             <Heart className="h-5 w-5 text-primary" />
                             Favorite Episode
                           </h4>
                           <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none bg-muted/50 p-4 rounded-md border">
-                              {anime.favoriteEpisode}
+                              {(media as Anime | KDrama).favoriteEpisode}
                           </div>
                         </div>
                       )}

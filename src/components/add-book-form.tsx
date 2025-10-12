@@ -10,11 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SearchMedia } from './search-media';
 import type { NormalizedMedia } from '@/lib/types';
-import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES } from '@/lib/types';
+import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Book, Movie, Anime } from '@/lib/types';
+import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -22,17 +22,19 @@ const formSchema = z.object({
   authors: z.string().optional(),
   openLibraryId: z.string().optional(),
   
-  // Movie specific
+  // Movie/Drama specific
   releaseYear: z.number().optional(),
   tmdbId: z.number().optional(),
 
-  // Anime specific
+  // Anime/Drama specific
   episodes: z.number().optional(),
-  jikanMalId: z.number().optional(),
   favoriteEpisode: z.string().optional(),
 
+  // Anime specific
+  jikanMalId: z.number().optional(),
+
   // Common
-  mediaType: z.enum(['Book', 'Movie', 'Anime']),
+  mediaType: z.enum(['Book', 'Movie', 'Anime', 'KDrama']),
   status: z.string(),
   rating: z.number().int().min(0).max(5).optional(),
   notes: z.string().optional(),
@@ -42,21 +44,34 @@ const formSchema = z.object({
 
 type AddBookFormProps = {
     onFormSubmit: (data: any, mediaId?: string) => void;
-    mediaToEdit?: Book | Movie | Anime | null;
+    mediaToEdit?: Book | Movie | Anime | KDrama | null;
 };
 
 export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const [activeMediaType, setActiveMediaType] = useState<'Book' | 'Movie' | 'Anime'>(mediaToEdit?.mediaType || 'Book');
+  const [activeMediaType, setActiveMediaType] = useState<'Book' | 'Movie' | 'Anime' | 'KDrama'>(mediaToEdit?.mediaType || 'Book');
   
   const isEditMode = !!mediaToEdit;
   
-  const currentStatuses = activeMediaType === 'Book' 
-    ? BOOK_STATUSES 
-    : activeMediaType === 'Movie' 
-    ? MOVIE_STATUSES
-    : ANIME_STATUSES;
+  let currentStatuses;
+    switch (activeMediaType) {
+        case 'Book':
+            currentStatuses = BOOK_STATUSES;
+            break;
+        case 'Movie':
+            currentStatuses = MOVIE_STATUSES;
+            break;
+        case 'Anime':
+            currentStatuses = ANIME_STATUSES;
+            break;
+        case 'KDrama':
+            currentStatuses = KDRAMA_STATUSES;
+            break;
+        default:
+            currentStatuses = [];
+    }
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -81,7 +96,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         editValues.authors = (mediaToEdit as Book).authors.join(', ');
       }
       form.reset(editValues);
-      setActiveMediaType(mediaToEdit.mediaType as 'Book' | 'Movie' | 'Anime');
+      setActiveMediaType(mediaToEdit.mediaType as 'Book' | 'Movie' | 'Anime' | 'KDrama');
     } else {
         form.reset({
             title: '',
@@ -110,8 +125,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
     const baseReset = {
       ...form.getValues(),
       title: media.title,
-      coverUrl: media.mediaType === 'Book' ? media.coverUrl : media.posterUrl,
-      description: media.mediaType === 'Book' ? media.description : media.overview,
+      coverUrl: (media as any).posterUrl || (media as any).coverUrl,
+      description: (media as any).overview || (media as any).description,
     }
 
     if (media.mediaType === 'Book') {
@@ -137,6 +152,14 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             mediaType: 'Anime',
             jikanMalId: media.jikanMalId,
             episodes: media.episodes,
+            status: 'Watching',
+        });
+    } else if (media.mediaType === 'KDrama') {
+        form.reset({
+            ...baseReset,
+            mediaType: 'KDrama',
+            tmdbId: media.tmdbId,
+            releaseYear: media.releaseYear,
             status: 'Watching',
         });
     }
@@ -169,11 +192,19 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             releaseYear: values.releaseYear,
             tmdbId: values.tmdbId,
         }
-      } else { // Anime
+      } else if (values.mediaType === 'Anime') {
         finalData = {
           ...commonData,
           episodes: values.episodes,
           jikanMalId: values.jikanMalId,
+          favoriteEpisode: values.favoriteEpisode,
+        }
+      } else { // KDrama
+        finalData = {
+          ...commonData,
+          episodes: values.episodes,
+          tmdbId: values.tmdbId,
+          releaseYear: values.releaseYear,
           favoriteEpisode: values.favoriteEpisode,
         }
       }
@@ -216,7 +247,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
               )}
             />
           )}
-          {currentMediaType === 'Movie' && (
+          {(currentMediaType === 'Movie' || currentMediaType === 'KDrama') && (
              <FormField
                 control={form.control}
                 name="releaseYear"
@@ -231,7 +262,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                 )}
             />
           )}
-          {currentMediaType === 'Anime' && (
+          {(currentMediaType === 'Anime' || currentMediaType === 'KDrama') && (
             <>
              <FormField
                 control={form.control}
@@ -266,7 +297,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select a status" /></SelectTrigger></FormControl>
                     <SelectContent>
                       {currentStatuses.map(status => (

@@ -1,4 +1,4 @@
-import type { Book, Movie, Anime } from '@/lib/types';
+import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,8 @@ import { Star } from 'lucide-react';
 const defaultBookCover = PlaceHolderImages.find(img => img.id === 'default-book-cover');
 const defaultMoviePoster = PlaceHolderImages.find(img => img.id === 'default-movie-poster') || defaultBookCover;
 const defaultAnimePoster = PlaceHolderImages.find(img => img.id === 'default-anime-poster') || defaultBookCover;
+const defaultKDramaPoster = PlaceHolderImages.find(img => img.id === 'default-kdrama-poster') || defaultMoviePoster;
+
 
 function StarRating({ rating }: { rating: number | null | undefined }) {
     if (!rating) return null;
@@ -21,19 +23,21 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
 }
 
 type MediaCardProps = {
-    media: Book | Movie | Anime;
-    onSelect: (media: Book | Movie | Anime) => void;
+    media: Book | Movie | Anime | KDrama;
+    onSelect: (media: Book | Movie | Anime | KDrama) => void;
 }
 
 export function MediaCard({ media, onSelect }: MediaCardProps) {
   const isBook = media.mediaType === 'Book';
   const isMovie = media.mediaType === 'Movie';
   const isAnime = media.mediaType === 'Anime';
+  const isKDrama = media.mediaType === 'KDrama';
 
   const coverUrl = media.coverUrl;
   let defaultCover = defaultBookCover;
   if (isMovie) defaultCover = defaultMoviePoster;
   if (isAnime) defaultCover = defaultAnimePoster;
+  if (isKDrama) defaultCover = defaultKDramaPoster;
 
   return (
     <div 
@@ -64,7 +68,7 @@ export function MediaCard({ media, onSelect }: MediaCardProps) {
                 {(media as Book).authors.join(', ')}
             </p>
         )}
-        {(isMovie) && (media as Movie).releaseYear && (
+        {(isMovie || isKDrama) && (media as Movie).releaseYear && (
              <p className="text-sm text-muted-foreground truncate mt-0.5">
                 {(media as Movie).releaseYear}
             </p>

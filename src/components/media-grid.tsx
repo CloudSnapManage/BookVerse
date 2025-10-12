@@ -1,10 +1,10 @@
-import type { Book, Movie, Anime } from '@/lib/types';
+import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 import { MediaCard } from './media-card';
-import { BookHeart, Clapperboard, Tv } from 'lucide-react';
+import { BookHeart, Clapperboard, Drama, Tv } from 'lucide-react';
 
 type MediaGridProps = {
-    media: (Book | Movie | Anime)[];
-    onMediaSelect: (item: Book | Movie | Anime) => void;
+    media: (Book | Movie | Anime | KDrama)[];
+    onMediaSelect: (item: Book | Movie | Anime | KDrama) => void;
 }
 
 export function MediaGrid({ media, onMediaSelect }: MediaGridProps) {
@@ -15,9 +15,10 @@ export function MediaGrid({ media, onMediaSelect }: MediaGridProps) {
                 <BookHeart className="mx-auto h-16 w-16" strokeWidth={1.5} />
                 <Clapperboard className="mx-auto h-16 w-16" strokeWidth={1.5} />
                 <Tv className="mx-auto h-16 w-16" strokeWidth={1.5} />
+                <Drama className="mx-auto h-16 w-16" strokeWidth={1.5} />
             </div>
             <h3 className="mt-6 font-headline text-2xl font-semibold">Your library is empty</h3>
-            <p className="mt-2 text-base text-muted-foreground">Add your first book, movie, or anime to get started.</p>
+            <p className="mt-2 text-base text-muted-foreground">Add your first book, movie, anime, or drama to get started.</p>
         </div>
     );
   }

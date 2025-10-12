@@ -12,8 +12,15 @@ export type Anime = Omit<PrismaMovie, 'mediaType'> & {
     favoriteEpisode?: string | null;
 };
 
+// We'll create a new type for KDrama based on the Movie model as well
+export type KDrama = Omit<PrismaMovie, 'mediaType'> & {
+    mediaType: 'KDrama',
+    episodes?: number | null;
+    tmdbId?: number | null;
+    favoriteEpisode?: string | null;
+}
 
-export type MediaType = 'Book' | 'Movie' | 'Anime';
+export type MediaType = 'Book' | 'Movie' | 'Anime' | 'KDrama';
 
 export type NormalizedBook = {
   mediaType: 'Book';
@@ -48,7 +55,18 @@ export type NormalizedAnime = {
     year?: number | null;
 }
 
-export type NormalizedMedia = NormalizedBook | NormalizedMovie | NormalizedAnime;
+export type NormalizedKDrama = {
+    mediaType: 'KDrama',
+    title: string,
+    posterUrl: string | null;
+    tmdbId: number;
+    episodes?: number | null;
+    overview?: string | null;
+    releaseYear?: number;
+}
+
+
+export type NormalizedMedia = NormalizedBook | NormalizedMovie | NormalizedAnime | NormalizedKDrama;
 
 export const BOOK_STATUSES = ['Owned', 'Wishlist', 'Loaned', 'Completed'] as const;
 export type BookStatus = typeof BOOK_STATUSES[number];
@@ -58,3 +76,6 @@ export type MovieStatus = typeof MOVIE_STATUSES[number];
 
 export const ANIME_STATUSES = ['Watching', 'Completed', 'On-Hold', 'Dropped', 'Plan to Watch'] as const;
 export type AnimeStatus = typeof ANIME_STATUSES[number];
+
+export const KDRAMA_STATUSES = ['Watching', 'Completed', 'On-Hold', 'Dropped', 'Plan to Watch'] as const;
+export type KDramaStatus = typeof KDRAMA_STATUSES[number];

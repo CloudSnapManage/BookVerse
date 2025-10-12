@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
-import type { Book, Movie, Anime } from '@/lib/types';
+import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 import { MediaGrid } from '@/components/media-grid';
 import { AddMediaButton } from '@/components/add-media-button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,7 +10,7 @@ import type { User } from 'next-auth';
 import { MediaDetailsDialog } from '@/components/media-details-dialog';
 import { TopLoader } from '@/components/top-loader';
 import { LibraryControls } from '@/components/library-controls';
-import type { BookStatus, MovieStatus, AnimeStatus } from '@/lib/types';
+import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
 import type { SortOption } from '@/components/library-controls';
 import { AddBookSheet } from '@/components/add-book-sheet';
 
@@ -40,14 +40,15 @@ function MediaListSkeleton() {
 const LOCAL_STORAGE_KEY_BOOKS = 'bookverse-library';
 const LOCAL_STORAGE_KEY_MOVIES = 'movieverse-library';
 const LOCAL_STORAGE_KEY_ANIME = 'animeverse-library';
+const LOCAL_STORAGE_KEY_KDRAMA = 'kdramaverse-library';
 
 export default function AppHomePage() {
-  const [media, setMedia] = useState<(Book | Movie | Anime)[]>([]);
+  const [media, setMedia] = useState<(Book | Movie | Anime | KDrama)[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMedia, setSelectedMedia] = useState<Book | Movie | Anime | null>(null);
-  const [editingMedia, setEditingMedia] = useState<Book | Movie | Anime | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Book | Movie | Anime | KDrama | null>(null);
+  const [editingMedia, setEditingMedia] = useState<Book | Movie | Anime | KDrama | null>(null);
 
-  const [filter, setFilter] = useState<BookStatus | MovieStatus | AnimeStatus | 'All'>('All');
+  const [filter, setFilter] = useState<BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All'>('All');
   const [sort, setSort] = useState<SortOption>({ key: 'createdAt', direction: 'desc' });
 
   // Load items from localStorage on initial render
@@ -57,8 +58,9 @@ export default function AppHomePage() {
         const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY_BOOKS);
         const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
         const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
+        const storedKDrama = localStorage.getItem(LOCAL_STORAGE_KEY_KDRAMA);
         
-        let allMedia: (Book | Movie | Anime)[] = [];
+        let allMedia: (Book | Movie | Anime | KDrama)[] = [];
 
         if (storedBooks) {
           const parsedBooks = JSON.parse(storedBooks).map((item: any) => ({
@@ -87,6 +89,15 @@ export default function AppHomePage() {
           }));
           allMedia = allMedia.concat(parsedAnime);
       }
+      if (storedKDrama) {
+        const parsedKDrama = JSON.parse(storedKDrama).map((item: any) => ({
+            ...item,
+            mediaType: 'KDrama',
+            createdAt: new Date(item.createdAt),
+            updatedAt: new Date(item.updatedAt),
+        }));
+        allMedia = allMedia.concat(parsedKDrama);
+    }
         setMedia(allMedia);
         setLoading(false);
       }, 700);
@@ -104,16 +115,18 @@ export default function AppHomePage() {
         const books = media.filter(item => item.mediaType === 'Book');
         const movies = media.filter(item => item.mediaType === 'Movie');
         const anime = media.filter(item => item.mediaType === 'Anime');
+        const kdrama = media.filter(item => item.mediaType === 'KDrama');
         localStorage.setItem(LOCAL_STORAGE_KEY_BOOKS, JSON.stringify(books));
         localStorage.setItem(LOCAL_STORAGE_KEY_MOVIES, JSON.stringify(movies));
         localStorage.setItem(LOCAL_STORAGE_KEY_ANIME, JSON.stringify(anime));
+        localStorage.setItem(LOCAL_STORAGE_KEY_KDRAMA, JSON.stringify(kdrama));
       } catch (error) {
         console.error('Failed to save items to localStorage', error);
       }
     }
   }, [media, loading]);
 
-  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<KDrama, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
     const newItem = {
       ...newMediaData,
       id: new Date().toISOString(), // Temporary unique ID
@@ -121,10 +134,10 @@ export default function AppHomePage() {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    setMedia(prevMedia => [newItem, ...prevMedia]);
+    setMedia(prevMedia => [newItem as any, ...prevMedia]);
   };
   
-  const handleMediaUpdated = (updatedMedia: Book | Movie | Anime) => {
+  const handleMediaUpdated = (updatedMedia: Book | Movie | Anime | KDrama) => {
     setMedia(prevMedia =>
         prevMedia.map(item => (item.id === updatedMedia.id ? { ...updatedMedia, updatedAt: new Date() } : item))
     );
@@ -137,11 +150,11 @@ export default function AppHomePage() {
     setSelectedMedia(null);
   }
 
-  const handleMediaSelect = (item: Book | Movie | Anime) => {
+  const handleMediaSelect = (item: Book | Movie | Anime | KDrama) => {
     setSelectedMedia(item);
   };
   
-  const handleEditRequest = (item: Book | Movie | Anime) => {
+  const handleEditRequest = (item: Book | Movie | Anime | KDrama) => {
     setSelectedMedia(null);
     setEditingMedia(item);
   };

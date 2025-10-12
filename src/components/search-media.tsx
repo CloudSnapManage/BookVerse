@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
-import { Loader2, Search, Book, Film, Tv } from 'lucide-react';
+import { Loader2, Search, Book, Film, Tv, Drama } from 'lucide-react';
 import type { NormalizedMedia, MediaType } from '@/lib/types';
 import { Button } from './ui/button';
 
@@ -28,14 +28,28 @@ export function SearchMedia({
     onSearchTypeChange(searchType);
   }, [searchType, onSearchTypeChange]);
 
-  const apiUrl =
-    debouncedQuery.length >= 3
-      ? searchType === 'Book'
-        ? `/api/search/books?q=${encodeURIComponent(debouncedQuery)}`
-        : searchType === 'Movie'
-        ? `/api/search/movies?q=${encodeURIComponent(debouncedQuery)}`
-        : `/api/search/anime?q=${encodeURIComponent(debouncedQuery)}`
-      : null;
+  let apiUrl;
+    if (debouncedQuery.length >= 3) {
+        switch (searchType) {
+            case 'Book':
+                apiUrl = `/api/search/books?q=${encodeURIComponent(debouncedQuery)}`;
+                break;
+            case 'Movie':
+                apiUrl = `/api/search/movies?q=${encodeURIComponent(debouncedQuery)}`;
+                break;
+            case 'Anime':
+                apiUrl = `/api/search/anime?q=${encodeURIComponent(debouncedQuery)}`;
+                break;
+            case 'KDrama':
+                apiUrl = `/api/search/kdrama?q=${encodeURIComponent(debouncedQuery)}`;
+                break;
+            default:
+                apiUrl = null;
+        }
+    } else {
+        apiUrl = null;
+    }
+
 
   const { data: results, error, isLoading } = useSWR<NormalizedMedia[]>(apiUrl, fetcher);
 
@@ -66,6 +80,7 @@ export function SearchMedia({
     if (media.mediaType === 'Book') return media.openLibraryId;
     if (media.mediaType === 'Movie') return media.tmdbId;
     if (media.mediaType === 'Anime') return media.jikanMalId;
+    if (media.mediaType === 'KDrama') return media.tmdbId;
     return new Date().toISOString();
   }
 
@@ -96,6 +111,14 @@ export function SearchMedia({
             >
                 <Tv className="mr-2 h-4 w-4" /> Anime
             </Button>
+            <Button 
+                variant={searchType === 'KDrama' ? 'secondary' : 'ghost'}
+                size="sm" 
+                onClick={() => setSearchType('KDrama')}
+                className='h-8'
+            >
+                <Drama className="mr-2 h-4 w-4" /> K-Drama
+            </Button>
         </div>
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -124,7 +147,7 @@ export function SearchMedia({
                   <button type="button" onClick={() => handleSelect(media)} className="w-full text-left p-3 hover:bg-accent transition-colors flex items-start gap-4">
                     <div className="relative h-20 w-14 flex-shrink-0 rounded-sm overflow-hidden bg-muted">
                         <Image
-                            src={(media.mediaType === 'Book' ? media.coverUrl : media.posterUrl) || `https://picsum.photos/seed/${getMediaId(media)}/100/150`}
+                            src={(media as any).posterUrl || (media as any).coverUrl || `https://picsum.photos/seed/${getMediaId(media)}/100/150`}
                             alt={`Cover of ${media.title}`}
                             fill
                             className="object-cover"
@@ -144,6 +167,9 @@ export function SearchMedia({
                       )}
                        {media.mediaType === 'Anime' && (
                           <p className="text-sm text-muted-foreground">{media.episodes} episodes</p>
+                      )}
+                      {media.mediaType === 'KDrama' && (
+                          <p className="text-sm text-muted-foreground">{media.releaseYear}</p>
                       )}
                     </div>
                   </button>
