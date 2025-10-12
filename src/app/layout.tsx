@@ -26,8 +26,9 @@ export default function RootLayout({
       <body className={cn('font-body antialiased', inter.variable, literata.variable)}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="slate"
           enableSystem
+          themes={['slate', 'zinc', 'rose', 'violet', 'green']}
         >
           {children}
           <Toaster />
