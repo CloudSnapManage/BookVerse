@@ -1,4 +1,4 @@
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import type { LibraryItem, Book, Movie, Anime, KDrama } from '@/lib/types';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,8 +23,8 @@ function StarRating({ rating }: { rating: number | null | undefined }) {
 }
 
 type MediaCardProps = {
-    media: Book | Movie | Anime | KDrama;
-    onSelect: (media: Book | Movie | Anime | KDrama) => void;
+    media: LibraryItem;
+    onSelect: (media: LibraryItem) => void;
 }
 
 export function MediaCard({ media, onSelect }: MediaCardProps) {

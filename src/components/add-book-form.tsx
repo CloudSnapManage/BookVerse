@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SearchMedia } from './search-media';
-import type { NormalizedMedia } from '@/lib/types';
+import type { NormalizedMedia, LibraryItem } from '@/lib/types';
 import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
@@ -44,7 +44,7 @@ const formSchema = z.object({
 
 type AddBookFormProps = {
     onFormSubmit: (data: any, mediaId?: string) => void;
-    mediaToEdit?: Book | Movie | Anime | KDrama | null;
+    mediaToEdit?: LibraryItem | null;
 };
 
 export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
@@ -91,6 +91,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
       const editValues: any = {
         ...mediaToEdit,
         rating: mediaToEdit.rating ?? 0,
+        notes: mediaToEdit.notes ?? '',
+        description: mediaToEdit.description ?? '',
       }
       if (mediaToEdit.mediaType === 'Book') {
         editValues.authors = (mediaToEdit as Book).authors.join(', ');

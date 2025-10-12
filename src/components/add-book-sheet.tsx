@@ -10,13 +10,13 @@ import {
 } from '@/components/ui/sheet';
 import { AddBookForm } from './add-book-form';
 import { useState, useEffect } from 'react';
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import type { LibraryItem } from '@/lib/types';
 
 type AddBookSheetProps = {
     children?: React.ReactNode;
     onMediaAdded: (mediaData: any) => void;
     onMediaUpdated: (updatedMedia: any) => void;
-    mediaToEdit?: Book | Movie | Anime | KDrama | null;
+    mediaToEdit?: LibraryItem | null;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 };

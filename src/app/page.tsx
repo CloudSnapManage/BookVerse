@@ -1,17 +1,16 @@
 'use client';
 
 import { Suspense, useState, useEffect, useMemo } from 'react';
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import type { LibraryItem, Book, Movie, Anime, KDrama, BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
 import { MediaGrid } from '@/components/media-grid';
 import { AddMediaButton } from '@/components/add-media-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Header } from '@/components/header';
 import { MediaDetailsDialog } from '@/components/media-details-dialog';
 import { TopLoader } from '@/components/top-loader';
-import { LibraryControls } from '@/components/library-controls';
-import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
-import type { SortOption } from '@/components/library-controls';
+import { LibraryControls, type SortOption } from '@/components/library-controls';
 import { AddBookSheet } from '@/components/add-book-sheet';
+
 
 function MediaListSkeleton() {
   return (
@@ -35,10 +34,10 @@ const LOCAL_STORAGE_KEY_ANIME = 'animeverse-library';
 const LOCAL_STORAGE_KEY_KDRAMA = 'kdramaverse-library';
 
 export default function AppHomePage() {
-  const [media, setMedia] = useState<(Book | Movie | Anime | KDrama)[]>([]);
+  const [media, setMedia] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMedia, setSelectedMedia] = useState<Book | Movie | Anime | KDrama | null>(null);
-  const [editingMedia, setEditingMedia] = useState<Book | Movie | Anime | KDrama | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<LibraryItem | null>(null);
+  const [editingMedia, setEditingMedia] = useState<LibraryItem | null>(null);
 
   const [filter, setFilter] = useState<BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All'>('All');
   const [sort, setSort] = useState<SortOption>({ key: 'createdAt', direction: 'desc' });
@@ -52,7 +51,7 @@ export default function AppHomePage() {
         const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
         const storedKDrama = localStorage.getItem(LOCAL_STORAGE_KEY_KDRAMA);
         
-        let allMedia: (Book | Movie | Anime | KDrama)[] = [];
+        let allMedia: LibraryItem[] = [];
 
         if (storedBooks) {
           const parsedBooks = JSON.parse(storedBooks).map((item: any) => ({
@@ -118,17 +117,17 @@ export default function AppHomePage() {
     }
   }, [media, loading]);
 
-  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<KDrama, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
-    const newItem = {
+  const handleMediaAdded = (newMediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt'> | Omit<KDrama, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newItem: LibraryItem = {
       ...newMediaData,
       id: new Date().toISOString(), // Temporary unique ID
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
-    setMedia(prevMedia => [newItem as any, ...prevMedia]);
+    } as LibraryItem;
+    setMedia(prevMedia => [newItem, ...prevMedia]);
   };
   
-  const handleMediaUpdated = (updatedMedia: Book | Movie | Anime | KDrama) => {
+  const handleMediaUpdated = (updatedMedia: LibraryItem) => {
     setMedia(prevMedia =>
         prevMedia.map(item => (item.id === updatedMedia.id ? { ...updatedMedia, updatedAt: new Date() } : item))
     );
@@ -141,11 +140,11 @@ export default function AppHomePage() {
     setSelectedMedia(null);
   }
 
-  const handleMediaSelect = (item: Book | Movie | Anime | KDrama) => {
+  const handleMediaSelect = (item: LibraryItem) => {
     setSelectedMedia(item);
   };
   
-  const handleEditRequest = (item: Book | Movie | Anime | KDrama) => {
+  const handleEditRequest = (item: LibraryItem) => {
     setSelectedMedia(null);
     setEditingMedia(item);
   };

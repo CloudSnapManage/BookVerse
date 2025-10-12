@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import type { Book, Movie, Anime, KDrama } from '@/lib/types';
 
 type AddMediaButtonProps = {
-    onMediaAdded: (mediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt' | 'userId'> | Omit<KDrama, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
+    onMediaAdded: (mediaData: Omit<Book, 'id' | 'createdAt' | 'updatedAt'> | Omit<Movie, 'id' | 'createdAt' | 'updatedAt'> | Omit<Anime, 'id' | 'createdAt' | 'updatedAt'> | Omit<KDrama, 'id' | 'createdAt' | 'updatedAt'>) => void;
     children?: React.ReactNode;
 };
 

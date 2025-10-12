@@ -1,10 +1,10 @@
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import type { LibraryItem } from '@/lib/types';
 import { MediaCard } from './media-card';
 import { BookHeart, Clapperboard, Drama, Tv } from 'lucide-react';
 
 type MediaGridProps = {
-    media: (Book | Movie | Anime | KDrama)[];
-    onMediaSelect: (item: Book | Movie | Anime | KDrama) => void;
+    media: LibraryItem[];
+    onMediaSelect: (item: LibraryItem) => void;
 }
 
 export function MediaGrid({ media, onMediaSelect }: MediaGridProps) {

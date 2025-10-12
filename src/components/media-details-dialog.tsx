@@ -1,6 +1,6 @@
 'use client';
 
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import type { LibraryItem, Book, Movie, Anime, KDrama } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -36,10 +36,10 @@ const defaultKDramaPoster = PlaceHolderImages.find(img => img.id === 'default-kd
 
 
 type MediaDetailsDialogProps = {
-  media: Book | Movie | Anime | KDrama | null;
+  media: LibraryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (media: Book | Movie | Anime | KDrama) => void;
+  onEdit: (media: LibraryItem) => void;
   onDelete: (mediaId: string) => void;
 };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import type { LibraryItem, Book, Movie, Anime, KDrama } from '@/lib/types';
 import { Header } from '@/components/header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BookOpenCheck, Clapperboard, Film, Library, Drama, Tv } from 'lucide-react';
@@ -67,8 +67,6 @@ export default function DashboardPage() {
       setKdramas([]);
     }
   }, []);
-  
-  const allMedia = [...books, ...movies, ...anime, ...kdramas];
 
   const totalBooks = books.length;
   const totalMovies = movies.length;
