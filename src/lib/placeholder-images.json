@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A cozy reading nook with a bookshelf.",
+      "imageUrl": "https://picsum.photos/seed/hero/1600/900",
+      "imageHint": "reading library"
+    },
+    {
+      "id": "default-book-cover",
+      "description": "A placeholder for a book cover.",
+      "imageUrl": "https://picsum.photos/seed/bookcover/400/600",
+      "imageHint": "book cover"
+    }
+  ]
 }
