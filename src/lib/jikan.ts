@@ -33,7 +33,7 @@ function normalizeAnime(anime: JikanAnimeResult): NormalizedAnime {
     jikanMalId: anime.mal_id,
     title: anime.title_english || anime.title,
     posterUrl: anime.images.jpg.large_image_url || anime.images.jpg.image_url,
-    episodes: anime.episodes,
+    episodes: anime.episodes ?? undefined,
     overview: anime.synopsis,
     year: anime.year,
   };

@@ -155,7 +155,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             ...baseReset,
             mediaType: 'Anime',
             jikanMalId: media.jikanMalId,
-            episodes: media.episodes,
+            episodes: media.episodes || undefined,
             status: 'Watching',
         });
     } else if (media.mediaType === 'KDrama') {
@@ -353,5 +353,3 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
     </div>
   );
 }
-
-    
