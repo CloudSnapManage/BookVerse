@@ -28,14 +28,14 @@ export function AddBookSheet({ children, onBookAdded }: AddBookSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="font-headline">Add a New Book</SheetTitle>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader className="text-left">
+          <SheetTitle className="font-headline text-2xl">Add a New Book</SheetTitle>
           <SheetDescription>
             Search for a book to auto-fill details, or enter them manually.
           </SheetDescription>
         </SheetHeader>
-        <div className="py-4">
+        <div className="py-6">
           <AddBookForm onBookAdded={handleBookAdded} />
         </div>
       </SheetContent>

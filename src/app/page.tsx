@@ -18,8 +18,8 @@ const demoUser: User = {
 
 function BookListSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: 8 }).map((_, i) => (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {Array.from({ length: 10 }).map((_, i) => (
         <div key={i} className="flex flex-col space-y-3">
           <Skeleton className="h-[300px] w-full rounded-lg" />
           <div className="space-y-2">
@@ -85,12 +85,13 @@ export default function AppHomePage() {
 
   return (
     <>
-      <div className="flex min-h-screen w-full flex-col">
+      <div className="flex min-h-screen w-full flex-col bg-background">
         <Header user={demoUser} onBookAdded={handleBookAdded} />
         <main className="flex-1">
-          <div className="container mx-auto py-8 px-4">
-            <div className="flex items-center justify-between">
-              <h1 className="font-headline text-3xl font-bold">My Library</h1>
+          <div className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
+            <div className="mb-8 flex items-center justify-between">
+              <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">My Library</h1>
+              <AddBookButton onBookAdded={handleBookAdded}>Add Book</AddBookButton>
             </div>
             
             <div className="mt-8">

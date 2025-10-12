@@ -52,19 +52,19 @@ export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedB
   return (
     <div className="relative" ref={searchContainerRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search for a book by title..."
+          placeholder="Search to add a book..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          className="pl-10"
+          className="pl-11 h-11 text-base"
         />
-        {isLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />}
+        {isLoading && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />}
       </div>
       {isFocused && (query.length > 0) && (
-        <Card className="absolute z-10 mt-2 w-full max-h-96 overflow-y-auto">
+        <Card className="absolute z-10 mt-2 w-full max-h-96 overflow-y-auto shadow-lg">
           {debouncedQuery.length < 3 ? (
              <div className="p-4 text-sm text-muted-foreground">Keep typing to see results...</div>
           ) : isLoading && !results ? (
@@ -76,19 +76,19 @@ export function SearchBooks({ onBookSelect }: { onBookSelect: (book: NormalizedB
               {results.map((book) => (
                 <li key={book.openLibraryId}>
                   <button type="button" onClick={() => handleSelect(book)} className="w-full text-left p-3 hover:bg-accent transition-colors flex items-start gap-4">
-                    <div className="relative h-20 w-14 flex-shrink-0">
+                    <div className="relative h-20 w-14 flex-shrink-0 rounded-sm overflow-hidden">
                         <Image
                             src={book.coverUrl || `https://picsum.photos/seed/${book.openLibraryId}/100/150`}
                             alt={`Cover of ${book.title}`}
                             fill
-                            className="object-cover rounded-sm"
+                            className="object-cover"
                             sizes="56px"
                         />
                     </div>
                     <div>
-                      <p className="font-semibold">{book.title}</p>
+                      <p className="font-semibold leading-snug">{book.title}</p>
                       <p className="text-sm text-muted-foreground">{book.authors.join(', ')}</p>
-                      {book.publishYear && <p className="text-xs text-muted-foreground">{book.publishYear}</p>}
+                      {book.publishYear && <p className="text-xs text-muted-foreground mt-1">{book.publishYear}</p>}
                     </div>
                   </button>
                 </li>
