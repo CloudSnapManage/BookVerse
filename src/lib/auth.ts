@@ -72,6 +72,7 @@ const baseConfig: NextAuthConfig = {
   pages: {
     signIn: '/login',
     verifyRequest: '/login/magic-link-sent',
+    error: '/login', // Redirect to login page on error
   },
   callbacks: {
     async session({ session, token }) {
