@@ -44,57 +44,56 @@ export default function AppHomePage() {
 
   // Load items from localStorage on initial render
   useEffect(() => {
+    setLoading(true);
     try {
-      setTimeout(() => {
-        const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY_BOOKS);
-        const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
-        const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
-        const storedKDrama = localStorage.getItem(LOCAL_STORAGE_KEY_KDRAMA);
-        
-        let allMedia: LibraryItem[] = [];
+      const storedBooks = localStorage.getItem(LOCAL_STORAGE_KEY_BOOKS);
+      const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
+      const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
+      const storedKDrama = localStorage.getItem(LOCAL_STORAGE_KEY_KDRAMA);
+      
+      let allMedia: LibraryItem[] = [];
 
-        if (storedBooks) {
-          const parsedBooks = JSON.parse(storedBooks).map((item: any) => ({
-            ...item,
-            mediaType: 'Book',
-            createdAt: new Date(item.createdAt),
-            updatedAt: new Date(item.updatedAt),
-          }));
-          allMedia = allMedia.concat(parsedBooks);
-        }
-        if (storedMovies) {
-            const parsedMovies = JSON.parse(storedMovies).map((item: any) => ({
-                ...item,
-                mediaType: 'Movie',
-                createdAt: new Date(item.createdAt),
-                updatedAt: new Date(item.updatedAt),
-            }));
-            allMedia = allMedia.concat(parsedMovies);
-        }
-        if (storedAnime) {
-          const parsedAnime = JSON.parse(storedAnime).map((item: any) => ({
+      if (storedBooks) {
+        const parsedBooks = JSON.parse(storedBooks).map((item: any) => ({
+          ...item,
+          mediaType: 'Book',
+          createdAt: new Date(item.createdAt),
+          updatedAt: new Date(item.updatedAt),
+        }));
+        allMedia = allMedia.concat(parsedBooks);
+      }
+      if (storedMovies) {
+          const parsedMovies = JSON.parse(storedMovies).map((item: any) => ({
               ...item,
-              mediaType: 'Anime',
+              mediaType: 'Movie',
               createdAt: new Date(item.createdAt),
               updatedAt: new Date(item.updatedAt),
           }));
-          allMedia = allMedia.concat(parsedAnime);
+          allMedia = allMedia.concat(parsedMovies);
       }
-      if (storedKDrama) {
-        const parsedKDrama = JSON.parse(storedKDrama).map((item: any) => ({
+      if (storedAnime) {
+        const parsedAnime = JSON.parse(storedAnime).map((item: any) => ({
             ...item,
-            mediaType: 'KDrama',
+            mediaType: 'Anime',
             createdAt: new Date(item.createdAt),
             updatedAt: new Date(item.updatedAt),
         }));
-        allMedia = allMedia.concat(parsedKDrama);
+        allMedia = allMedia.concat(parsedAnime);
     }
-        setMedia(allMedia);
-        setLoading(false);
-      }, 700);
+    if (storedKDrama) {
+      const parsedKDrama = JSON.parse(storedKDrama).map((item: any) => ({
+          ...item,
+          mediaType: 'KDrama',
+          createdAt: new Date(item.createdAt),
+          updatedAt: new Date(item.updatedAt),
+      }));
+      allMedia = allMedia.concat(parsedKDrama);
+  }
+      setMedia(allMedia);
     } catch (error) {
       console.error('Failed to parse items from localStorage', error);
       setMedia([]);
+    } finally {
       setLoading(false);
     }
   }, []);

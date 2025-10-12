@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     return NextResponse.json(movies);
   } catch (error) {
     console.error('Error in movie search API:', error);
-    return NextResponse.json({ error: 'Failed to fetch movie data.' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return NextResponse.json({ error: 'Failed to fetch movie data.', details: errorMessage }, { status: 500 });
   }
 }

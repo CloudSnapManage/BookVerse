@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     return NextResponse.json(dramas);
   } catch (error) {
     console.error('Error in TV show search API:', error);
-    return NextResponse.json({ error: 'Failed to fetch TV show data.' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return NextResponse.json({ error: 'Failed to fetch TV show data.', details: errorMessage }, { status: 500 });
   }
 }
