@@ -60,12 +60,6 @@ export function BookDetailsDialog({ book, open, onOpenChange }: BookDetailsDialo
             </div>
             <div className="mt-6 space-y-4 flex-grow overflow-y-auto pr-2">
                 <div>
-                    <h4 className="font-semibold">Description</h4>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-1">
-                        {book.description || 'No description available.'}
-                    </p>
-                </div>
-                <div>
                     <h4 className="font-semibold">My Notes</h4>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-1">
                         {book.notes || 'You haven\'t added any notes for this book yet.'}
