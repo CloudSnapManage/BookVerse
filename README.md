@@ -1,17 +1,24 @@
-# BookVerse - Personal Book Library Manager
+# BookVerse - Personal Media Library
 
 [![View on GitHub](https://img.shields.io/badge/GitHub-View_Source-blue?logo=github)](https://github.com/CloudSnapManage/BookVerse)
 
-BookVerse is a modern, personal web application that lets you manage your book library with ease. Search for any book, add it to your collection under different statuses (Owned, Wishlist, etc.), add personal notes and ratings, and view your entire library on a polished, filterable dashboard.
+BookVerse is a modern, personal web application that lets you manage your entire media library with ease. Search for books, movies, anime, and K-dramas, add them to your collection, track your progress, add personal notes and ratings, and view your entire library on a polished, filterable dashboard.
 
-![BookVerse Screenshot](https://storage.googleapis.com/gemini-studio-user-assets/images/user-assets/e65b7193-41c3-42a9-9524-7f1c1f516801_2024-07-29T10_51_52.378Z.png)
-*<p align="center">A preview of the BookVerse dashboard with the dark violet theme.</p>*
+<p align="center">
+  <img alt="BookVerse Library Screenshot" src="./screenshots/bookverse-screenshot.png">
+  <em>The main library view with a collection of different media types.</em>
+</p>
+
+<p align="center">
+  <img alt="BookVerse Dashboard Screenshot" src="./screenshots/dashboard.png">
+  <em>The dashboard view providing a statistical overview of the library.</em>
+</p>
 
 ---
 
 ## Features
 
-*   **📚 Powerful Book Search**: Instantly find books, movies, anime, and K-dramas from various APIs.
+*   **📚 Powerful Search**: Instantly find books, movies, anime, and K-dramas from various APIs.
 *   **➕ Add Media Easily**: Add items to your library by searching and auto-filling details, or add them manually.
 *   **🗂️ Organize Your Library**: Categorize media with statuses like `Completed`, `Watching`, or `Wishlist`.
 *   **✍️ Personalize**: Add your own 5-star ratings and private notes to each item.
