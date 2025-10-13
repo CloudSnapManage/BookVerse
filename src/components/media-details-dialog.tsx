@@ -74,7 +74,7 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
   const kdrama = isKDrama ? media as KDrama : null;
 
   const externalLink = isBook && book?.openLibraryId ? `https://openlibrary.org/works/${book.openLibraryId}`
-    : (isMovie || isKDrama) && (media as Movie)?.tmdbId ? `https://www.themoviedb.org/${isMovie ? 'movie' : 'tv'}/${(media as Movie).tmdbId}`
+    : (isMovie || isKDrama) && (movie || kdrama)?.tmdbId ? `https://www.themoviedb.org/${isMovie ? 'movie' : 'tv'}/${(movie || kdrama)?.tmdbId}`
     : isAnime && anime?.jikanMalId ? `https://myanimelist.net/anime/${anime.jikanMalId}`
     : null;
 
@@ -102,9 +102,9 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
               <div className="relative z-10 w-full flex justify-between items-end gap-4">
                   <div>
                     <DialogTitle className="font-headline text-2xl md:text-3xl mb-1 drop-shadow-md text-foreground">{media.title}</DialogTitle>
-                    {isBook && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{book.authors.join(', ')}</DialogDescription>}
-                    {(isMovie || isKDrama) && (media as Movie)?.releaseYear && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{(media as Movie).releaseYear}</DialogDescription>}
-                    {(isAnime || isKDrama) && (media as Anime | KDrama)?.episodes && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow flex items-center gap-2"><Tv className="h-5 w-5" /> {(media as Anime | KDrama).episodes} episodes</DialogDescription>}
+                    {isBook && book && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{book.authors.join(', ')}</DialogDescription>}
+                    {(isMovie || isKDrama) && (movie || kdrama)?.releaseYear && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{(movie || kdrama)?.releaseYear}</DialogDescription>}
+                    {(isAnime || isKDrama) && (anime || kdrama)?.episodes && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow flex items-center gap-2"><Tv className="h-5 w-5" /> {(anime || kdrama)?.episodes} episodes</DialogDescription>}
                   </div>
                   
                   <div className="flex items-center flex-shrink-0 gap-1">
@@ -177,14 +177,14 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                                   </div>
                               </div>
                           )}
-                          {(isAnime || isKDrama) && (media as Anime | KDrama)?.favoriteEpisode && (
+                          {(isAnime || isKDrama) && (anime || kdrama)?.favoriteEpisode && (
                             <div>
                               <h4 className="font-headline text-lg font-semibold mb-2 flex items-center gap-2">
                                 <Heart className="h-5 w-5 text-primary" />
                                 Favorite Episode
                               </h4>
                               <div className="text-base text-foreground/80 whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none bg-muted/50 p-4 rounded-md border">
-                                  {(media as Anime | KDrama).favoriteEpisode}
+                                  {(anime || kdrama)?.favoriteEpisode}
                               </div>
                             </div>
                           )}
