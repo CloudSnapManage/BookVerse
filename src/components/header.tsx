@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { LayoutDashboard } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
+import { SettingsDialog } from './settings-dialog';
 
 export function Header() {
   return (
@@ -18,6 +19,7 @@ export function Header() {
               Dashboard
             </Link>
           </Button>
+          <SettingsDialog />
           <ThemeToggle />
         </div>
       </div>
