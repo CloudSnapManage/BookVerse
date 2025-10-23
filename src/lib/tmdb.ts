@@ -50,7 +50,7 @@ function normalizeTvShow(show: TmdbTvResult): NormalizedKDrama {
 
 export async function searchMovies(query: string, limit = 10, apiKey: string): Promise<NormalizedMovie[]> {
   if (!apiKey) {
-    throw new Error('TMDb API Key is required.');
+    throw new Error('TMDb API Key is not provided.');
   }
     
   const response = await axios.get(`${TMDB_API_URL}/search/movie`, {
@@ -71,7 +71,7 @@ export async function searchMovies(query: string, limit = 10, apiKey: string): P
 
 export async function searchTvShows(query: string, limit = 10, apiKey: string): Promise<NormalizedKDrama[]> {
     if (!apiKey) {
-        throw new Error('TMDb API Key is required.');
+        throw new Error('TMDb API Key is not provided.');
     }
 
     const response = await axios.get(`${TMDB_API_URL}/search/tv`, {

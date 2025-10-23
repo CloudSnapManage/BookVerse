@@ -2,53 +2,78 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const TMDB_API_KEY_LOCAL_STORAGE = 'bookverse-tmdb-api-key';
+const TMDB_ENABLED_KEY = 'bookverse-tmdb-enabled';
+const TMDB_API_KEY = 'bookverse-tmdb-api-key';
 
-interface SettingsContextType {
+type SettingsContextType = {
+  isTmdbEnabled: boolean;
   tmdbApiKey: string | null;
-  setTmdbApiKey: (key: string) => void;
-}
+  isSettingsLoaded: boolean;
+  setTmdbEnabled: (enabled: boolean) => void;
+  saveTmdbApiKey: (apiKey: string) => void;
+};
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [tmdbApiKey, setTmdbApiKeyState] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  
-  // Load from env var or local storage on mount
+  const [isTmdbEnabled, setIsTmdbEnabled] = useState(false);
+  const [tmdbApiKey, setTmdbApiKey] = useState<string | null>(null);
+  const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
+
   useEffect(() => {
-    const envKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-    if (envKey) {
-      setTmdbApiKeyState(envKey);
-    } else {
-      try {
-        const storedKey = localStorage.getItem(TMDB_API_KEY_LOCAL_STORAGE);
-        if (storedKey) {
-          setTmdbApiKeyState(storedKey);
-        }
-      } catch (error) {
-        console.error('Failed to access localStorage:', error);
-      }
-    }
-    setIsLoaded(true);
-  }, []);
-
-  const setTmdbApiKey = useCallback((key: string) => {
     try {
-        localStorage.setItem(TMDB_API_KEY_LOCAL_STORAGE, key);
-        setTmdbApiKeyState(key);
+      const storedEnabled = localStorage.getItem(TMDB_ENABLED_KEY);
+      const storedApiKey = localStorage.getItem(TMDB_API_KEY);
+
+      const envApiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+
+      if (storedApiKey) {
+        setTmdbApiKey(storedApiKey);
+      } else if (envApiKey) {
+        setTmdbApiKey(envApiKey);
+      }
+
+      if (storedEnabled !== null) {
+        setIsTmdbEnabled(JSON.parse(storedEnabled));
+      } else if (envApiKey) {
+        // If env var is present, enable by default
+        setIsTmdbEnabled(true);
+      }
     } catch (error) {
-        console.error('Failed to save API key to localStorage:', error);
+      console.error("Failed to load settings from localStorage", error);
+    } finally {
+        setIsSettingsLoaded(true);
     }
   }, []);
 
-  const value = {
-    tmdbApiKey: isLoaded ? tmdbApiKey : null,
-    setTmdbApiKey
-  };
+  const handleSetTmdbEnabled = useCallback((enabled: boolean) => {
+    setIsTmdbEnabled(enabled);
+    try {
+      localStorage.setItem(TMDB_ENABLED_KEY, JSON.stringify(enabled));
+    } catch (error) {
+       console.error("Failed to save TMDB enabled status to localStorage", error);
+    }
+  }, []);
+
+  const handleSaveTmdbApiKey = useCallback((apiKey: string) => {
+    setTmdbApiKey(apiKey);
+    try {
+      localStorage.setItem(TMDB_API_KEY, apiKey);
+    } catch (error) {
+        console.error("Failed to save TMDB API key to localStorage", error);
+    }
+  }, []);
 
   return (
-    <SettingsContext.Provider value={value}>
+    <SettingsContext.Provider
+      value={{
+        isTmdbEnabled,
+        tmdbApiKey,
+        isSettingsLoaded,
+        setTmdbEnabled: handleSetTmdbEnabled,
+        saveTmdbApiKey: handleSaveTmdbApiKey,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );

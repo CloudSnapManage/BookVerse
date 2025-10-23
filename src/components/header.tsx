@@ -1,7 +1,7 @@
 import { AppLogo } from './logo';
 import Link from 'next/link';
 import { Button } from './ui/button';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, Settings } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import { SettingsDialog } from './settings-dialog';
 
@@ -19,7 +19,12 @@ export function Header() {
               Dashboard
             </Link>
           </Button>
-          <SettingsDialog />
+          <SettingsDialog>
+            <Button variant="ghost" size="icon">
+              <Settings className="h-5 w-5" />
+              <span className="sr-only">Settings</span>
+            </Button>
+          </SettingsDialog>
           <ThemeToggle />
         </div>
       </div>

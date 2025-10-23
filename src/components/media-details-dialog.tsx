@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { Badge } from './ui/badge';
@@ -104,7 +103,6 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                     <DialogTitle className="font-headline text-2xl md:text-3xl mb-1 drop-shadow-md text-foreground">{media.title}</DialogTitle>
                     {isBook && book?.authors && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{book.authors.join(', ')}</DialogDescription>}
                     {(isMovie || isKDrama) && (movie || kdrama)?.releaseYear && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{(movie || kdrama).releaseYear}</DialogDescription>}
-                    {(isAnime || isKDrama) && (anime || kdrama)?.episodes && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow flex items-center gap-2"><Tv className="h-5 w-5" /> {(anime || kdrama).episodes} episodes</DialogDescription>}
                   </div>
                   
                   <div className="flex items-center flex-shrink-0 gap-1">
@@ -165,6 +163,12 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                         <span className='text-sm font-medium'>My Rating</span>
                         <StarRating rating={media.rating} />
                       </div>
+                      {(isAnime || isKDrama) && (anime || kdrama)?.episodes && (
+                          <div className="flex items-center justify-between">
+                              <span className='text-sm font-medium'>Episodes</span>
+                              <span className="text-sm text-muted-foreground flex items-center gap-2"><Tv className="h-4 w-4" /> {(anime || kdrama).episodes}</span>
+                          </div>
+                      )}
                   </div>
               </div>
               <div className="md:col-span-2">

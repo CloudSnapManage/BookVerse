@@ -9,12 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SearchMedia } from './search-media';
-import type { NormalizedMedia, LibraryItem } from '@/lib/types';
-import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
+import type { NormalizedMedia, LibraryItem, Book, Movie, Anime, KDrama } from '@/lib/types';
+import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib:types';
 import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Book, Movie, Anime, KDrama } from '@/lib/types';
+import { useSettings } from '@/hooks/use-settings';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -52,10 +52,12 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [activeMediaType, setActiveMediaType] = useState<'Book' | 'Movie' | 'Anime' | 'KDrama'>(mediaToEdit?.mediaType || 'Book');
+  const { isTmdbEnabled } = useSettings();
   
   const isEditMode = !!mediaToEdit;
   
-  let currentStatuses;
+  let currentStatuses: readonly string[] = BOOK_STATUSES;
+  if (isTmdbEnabled) {
     switch (activeMediaType) {
         case 'Book':
             currentStatuses = BOOK_STATUSES;
@@ -70,8 +72,20 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             currentStatuses = KDRAMA_STATUSES;
             break;
         default:
-            currentStatuses = [];
+            currentStatuses = BOOK_STATUSES;
     }
+  } else {
+     switch (activeMediaType) {
+        case 'Book':
+            currentStatuses = BOOK_STATUSES;
+            break;
+        case 'Anime':
+            currentStatuses = ANIME_STATUSES;
+            break;
+        default:
+            currentStatuses = BOOK_STATUSES;
+    }
+  }
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -269,7 +283,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
               />
             </>
           )}
-          {(currentMediaType === 'Movie' || currentMediaType === 'KDrama') && (
+          {(currentMediaType === 'Movie' || currentMediaType === 'KDrama') && isTmdbEnabled && (
              <FormField
                 control={form.control}
                 name="releaseYear"
@@ -284,8 +298,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                 )}
             />
           )}
-          {(currentMediaType === 'Anime' || currentMediaType === 'KDrama') && (
-            <>
+          {(currentMediaType === 'Anime' || (currentMediaType === 'KDrama' && isTmdbEnabled)) && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
              <FormField
                 control={form.control}
                 name="episodes"
@@ -304,13 +318,13 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                 name="favoriteEpisode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Favorite Episode (Optional)</FormLabel>
-                    <FormControl><Input placeholder="e.g., Episode 10: The Turning Point" {...field} /></FormControl>
+                    <FormLabel>Favorite Episode</FormLabel>
+                    <FormControl><Input placeholder="Ep. 10: Turning Point" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </>
+            </div>
           )}
           <div className="grid grid-cols-2 gap-4">
             <FormField

@@ -8,6 +8,7 @@ import { BookOpenCheck, Clapperboard, Film, Library, Drama, Tv } from 'lucide-re
 import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 import Link from 'next/link';
+import { useSettings } from '@/hooks/use-settings';
 
 const LOCAL_STORAGE_KEY_BOOKS = 'bookverse-library';
 const LOCAL_STORAGE_KEY_MOVIES = 'movieverse-library';
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [anime, setAnime] = useState<Anime[]>([]);
   const [kdramas, setKdramas] = useState<KDrama[]>([]);
+  const { isTmdbEnabled } = useSettings();
 
   useEffect(() => {
     try {
@@ -32,15 +34,7 @@ export default function DashboardPage() {
         }));
         setBooks(parsedBooks);
       }
-      const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
-      if (storedMovies) {
-        const parsedMovies = JSON.parse(storedMovies).map((movie: any) => ({
-            ...movie,
-            createdAt: new Date(movie.createdAt),
-            updatedAt: new Date(movie.updatedAt),
-        }));
-        setMovies(parsedMovies);
-      }
+
       const storedAnime = localStorage.getItem(LOCAL_STORAGE_KEY_ANIME);
        if (storedAnime) {
         const parsedAnime = JSON.parse(storedAnime).map((a: any) => ({
@@ -50,14 +44,30 @@ export default function DashboardPage() {
         }));
         setAnime(parsedAnime);
       }
-      const storedKDramas = localStorage.getItem(LOCAL_STORAGE_KEY_KDRAMA);
-      if (storedKDramas) {
-        const parsedKDramas = JSON.parse(storedKDramas).map((d: any) => ({
-            ...d,
-            createdAt: new Date(d.createdAt),
-            updatedAt: new Date(d.updatedAt),
-        }));
-        setKdramas(parsedKDramas);
+
+      if (isTmdbEnabled) {
+        const storedMovies = localStorage.getItem(LOCAL_STORAGE_KEY_MOVIES);
+        if (storedMovies) {
+          const parsedMovies = JSON.parse(storedMovies).map((movie: any) => ({
+              ...movie,
+              createdAt: new Date(movie.createdAt),
+              updatedAt: new Date(movie.updatedAt),
+          }));
+          setMovies(parsedMovies);
+        }
+
+        const storedKDramas = localStorage.getItem(LOCAL_STORAGE_KEY_KDRAMA);
+        if (storedKDramas) {
+          const parsedKDramas = JSON.parse(storedKDramas).map((d: any) => ({
+              ...d,
+              createdAt: new Date(d.createdAt),
+              updatedAt: new Date(d.updatedAt),
+          }));
+          setKdramas(parsedKDramas);
+        }
+      } else {
+        setMovies([]);
+        setKdramas([]);
       }
     } catch (error) {
       console.error('Failed to parse items from localStorage', error);
@@ -66,7 +76,7 @@ export default function DashboardPage() {
       setAnime([]);
       setKdramas([]);
     }
-  }, []);
+  }, [isTmdbEnabled]);
 
   const totalBooks = books.length;
   const totalMovies = movies.length;
@@ -115,7 +125,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="grid gap-4 grid-cols-2 md:grid-cols-4 xl:grid-cols-8">
+          <div className={`grid gap-4 grid-cols-2 ${isTmdbEnabled ? 'md:grid-cols-4 xl:grid-cols-8' : 'md:grid-cols-4'}`}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Books</CardTitle>
@@ -123,33 +133,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalBooks}</div>
-              </CardContent>
-            </Card>
-             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Movies</CardTitle>
-                <Film className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalMovies}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Anime</CardTitle>
-                <Tv className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalAnime}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total K-Dramas</CardTitle>
-                <Drama className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalKDramas}</div>
               </CardContent>
             </Card>
             <Card>
@@ -163,11 +146,11 @@ export default function DashboardPage() {
             </Card>
              <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Movies Watched</CardTitle>
-                <Clapperboard className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Total Anime</CardTitle>
+                <Tv className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{watchedMovies}</div>
+                <div className="text-2xl font-bold">{totalAnime}</div>
               </CardContent>
             </Card>
             <Card>
@@ -179,18 +162,49 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold">{watchedAnime}</div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Dramas Completed</CardTitle>
-                <Clapperboard className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{watchedKDramas}</div>
-              </CardContent>
-            </Card>
+            {isTmdbEnabled && (
+              <>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Movies</CardTitle>
+                    <Film className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totalMovies}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Movies Watched</CardTitle>
+                    <Clapperboard className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{watchedMovies}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total K-Dramas</CardTitle>
+                    <Drama className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{totalKDramas}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Dramas Completed</CardTitle>
+                    <Clapperboard className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{watchedKDramas}</div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
 
-          <div className="mt-8 grid gap-8 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-4">
+          <div className={`mt-8 grid gap-8 md:grid-cols-1 lg:grid-cols-2 ${isTmdbEnabled ? 'xl:grid-cols-4' : 'xl:grid-cols-2'}`}>
             <Card>
                 <CardHeader>
                     <CardTitle className='font-headline'>Book Library</CardTitle>
@@ -204,23 +218,6 @@ export default function DashboardPage() {
                         <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)'}}/>
                         <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
                         <Bar dataKey="books" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                    </RechartsBarChart>
-                    </ResponsiveContainer>
-              </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className='font-headline'>Movie Library</CardTitle>
-                    <CardDescription>Breakdown by status.</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                    <ResponsiveContainer width="100%" height={350}>
-                    <RechartsBarChart data={movieChartData}>
-                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                        <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} />
-                        <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
-                        <Bar dataKey="movies" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                     </RechartsBarChart>
                     </ResponsiveContainer>
               </CardContent>
@@ -242,23 +239,44 @@ export default function DashboardPage() {
                     </ResponsiveContainer>
               </CardContent>
             </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className='font-headline'>K-Drama Library</CardTitle>
-                    <CardDescription>Breakdown by status.</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                    <ResponsiveContainer width="100%" height={350}>
-                    <RechartsBarChart data={kdramaChartData}>
-                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                        <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} />
-                        <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
-                        <Bar dataKey="dramas" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                    </RechartsBarChart>
-                    </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            {isTmdbEnabled && (
+              <>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className='font-headline'>Movie Library</CardTitle>
+                        <CardDescription>Breakdown by status.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <ResponsiveContainer width="100%" height={350}>
+                        <RechartsBarChart data={movieChartData}>
+                            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                            <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} />
+                            <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
+                            <Bar dataKey="movies" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </RechartsBarChart>
+                        </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className='font-headline'>K-Drama Library</CardTitle>
+                        <CardDescription>Breakdown by status.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <ResponsiveContainer width="100%" height={350}>
+                        <RechartsBarChart data={kdramaChartData}>
+                            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                            <Tooltip cursor={{ fill: 'hsl(var(--accent))' }} contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }} />
+                            <Legend wrapperStyle={{ fontSize: '0.8rem' }} />
+                            <Bar dataKey="dramas" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </RechartsBarChart>
+                        </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
 
         </div>

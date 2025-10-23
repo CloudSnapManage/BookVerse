@@ -10,6 +10,7 @@ import { MediaDetailsDialog } from '@/components/media-details-dialog';
 import { TopLoader } from '@/components/top-loader';
 import { LibraryControls, type SortOption } from '@/components/library-controls';
 import { AddBookSheet } from '@/components/add-book-sheet';
+import { useSettings } from '@/hooks/use-settings';
 
 
 function MediaListSkeleton() {
@@ -41,6 +42,8 @@ export default function AppHomePage() {
 
   const [filter, setFilter] = useState<BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All'>('All');
   const [sort, setSort] = useState<SortOption>({ key: 'createdAt', direction: 'desc' });
+  
+  const { isTmdbEnabled } = useSettings();
 
   // Load items from localStorage on initial render
   useEffect(() => {
@@ -62,7 +65,7 @@ export default function AppHomePage() {
         }));
         allMedia = allMedia.concat(parsedBooks);
       }
-      if (storedMovies) {
+      if (isTmdbEnabled && storedMovies) {
           const parsedMovies = JSON.parse(storedMovies).map((item: any) => ({
               ...item,
               mediaType: 'Movie',
@@ -80,7 +83,7 @@ export default function AppHomePage() {
         }));
         allMedia = allMedia.concat(parsedAnime);
     }
-    if (storedKDrama) {
+    if (isTmdbEnabled && storedKDrama) {
       const parsedKDrama = JSON.parse(storedKDrama).map((item: any) => ({
           ...item,
           mediaType: 'KDrama',
@@ -96,7 +99,7 @@ export default function AppHomePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isTmdbEnabled]);
 
   // Save items to localStorage whenever they change
   useEffect(() => {
@@ -149,9 +152,14 @@ export default function AppHomePage() {
   };
 
   const filteredAndSortedMedia = useMemo(() => {
-    let filtered = media;
+    let itemsToDisplay = media;
+    if (!isTmdbEnabled) {
+      itemsToDisplay = media.filter(item => item.mediaType !== 'Movie' && item.mediaType !== 'KDrama');
+    }
+
+    let filtered = itemsToDisplay;
     if (filter !== 'All') {
-      filtered = media.filter(item => item.status === filter);
+      filtered = itemsToDisplay.filter(item => item.status === filter);
     }
 
     return [...filtered].sort((a, b) => {
@@ -179,7 +187,7 @@ export default function AppHomePage() {
       if (valA > valB) return direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [media, filter, sort]);
+  }, [media, filter, sort, isTmdbEnabled]);
 
 
   return (

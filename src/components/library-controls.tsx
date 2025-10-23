@@ -14,6 +14,7 @@ import { Button } from './ui/button';
 import { ListFilter, ArrowUpDown } from 'lucide-react';
 import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
 import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
+import { useSettings } from '@/hooks/use-settings';
 
 const sortKeys = ['createdAt', 'title', 'rating', 'status', 'authors'] as const;
 type SortKey = typeof sortKeys[number];
@@ -39,6 +40,8 @@ type LibraryControlsProps = {
 };
 
 export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: LibraryControlsProps) {
+  const { isTmdbEnabled } = useSettings();
+  
   return (
     <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
       {/* Sort Control */}
@@ -58,12 +61,15 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
                     onSortChange({ key, direction });
                 }}
             >
-                {sortKeys.map((key) => (
+                {sortKeys.map((key) => {
+                  if (!isTmdbEnabled && key === 'authors') return null;
+                  return (
                     <React.Fragment key={key}>
                         <DropdownMenuRadioItem value={`${key}-desc`}>{sortLabels[key]} (Desc)</DropdownMenuRadioItem>
                         <DropdownMenuRadioItem value={`${key}-asc`}>{sortLabels[key]} (Asc)</DropdownMenuRadioItem>
                     </React.Fragment>
-                ))}
+                  )
+                })}
             </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -77,7 +83,6 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={filter} onValueChange={(value) => onFilterChange(value as any)}>
             <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
             <DropdownMenuSeparator />
@@ -86,20 +91,24 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
                 <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Movie Statuses</DropdownMenuLabel>
-            {MOVIE_STATUSES.map(status => (
-                <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
-            ))}
-            <DropdownMenuSeparator />
             <DropdownMenuLabel>Anime Statuses</DropdownMenuLabel>
             {ANIME_STATUSES.map(status => (
                 <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
             ))}
-             <DropdownMenuSeparator />
-            <DropdownMenuLabel>K-Drama Statuses</DropdownMenuLabel>
-            {KDRAMA_STATUSES.map(status => (
-                <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
-            ))}
+            {isTmdbEnabled && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Movie Statuses</DropdownMenuLabel>
+                {MOVIE_STATUSES.map(status => (
+                    <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>K-Drama Statuses</DropdownMenuLabel>
+                {KDRAMA_STATUSES.map(status => (
+                    <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+                ))}
+              </>
+            )}
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -25,17 +25,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn('font-body antialiased', inter.variable, literata.variable)}>
-        <SettingsProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="slate"
-            enableSystem
-            themes={['slate', 'dark-slate', 'zinc', 'dark-zinc', 'rose', 'dark-rose', 'violet', 'dark-violet', 'green', 'dark-green']}
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="slate"
+          enableSystem
+          themes={['slate', 'dark-slate', 'zinc', 'dark-zinc', 'rose', 'dark-rose', 'violet', 'dark-violet', 'green', 'dark-green']}
+        >
+          <SettingsProvider>
             {children}
             <Toaster />
-          </ThemeProvider>
-        </SettingsProvider>
+          </SettingsProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
