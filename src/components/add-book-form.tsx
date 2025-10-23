@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SearchMedia } from './search-media';
 import type { NormalizedMedia, LibraryItem, Book, Movie, Anime, KDrama } from '@/lib/types';
-import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib:types';
+import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 import { useEffect, useState, useTransition } from 'react';
 import { Loader2, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
