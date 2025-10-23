@@ -79,34 +79,35 @@ export default function DashboardPage() {
   }, [isTmdbEnabled]);
 
   const totalBooks = books.length;
-  const totalMovies = movies.length;
   const totalAnime = anime.length;
-  const totalKDramas = kdramas.length;
   const completedBooks = books.filter(b => b.status === 'Completed').length;
-  const watchedMovies = movies.filter(m => m.status === 'Watched').length;
   const watchedAnime = anime.filter(a => a.status === 'Completed').length;
-  const watchedKDramas = kdramas.filter(d => d.status === 'Completed').length;
-
+  
+  const totalMovies = isTmdbEnabled ? movies.length : 0;
+  const totalKDramas = isTmdbEnabled ? kdramas.length : 0;
+  const watchedMovies = isTmdbEnabled ? movies.filter(m => m.status === 'Watched').length : 0;
+  const watchedKDramas = isTmdbEnabled ? kdramas.filter(d => d.status === 'Completed').length : 0;
 
   const bookStatusCounts = BOOK_STATUSES.map(status => ({
     name: status,
     count: books.filter(b => b.status === status).length,
   }));
   
-  const movieStatusCounts = MOVIE_STATUSES.map(status => ({
-    name: status,
-    count: movies.filter(m => m.status === status).length,
-  }));
-  
   const animeStatusCounts = ANIME_STATUSES.map(status => ({
     name: status,
     count: anime.filter(a => a.status === status).length,
   }));
+  
+  const movieStatusCounts = isTmdbEnabled ? MOVIE_STATUSES.map(status => ({
+    name: status,
+    count: movies.filter(m => m.status === status).length,
+  })) : [];
 
-  const kdramaStatusCounts = KDRAMA_STATUSES.map(status => ({
+  const kdramaStatusCounts = isTmdbEnabled ? KDRAMA_STATUSES.map(status => ({
     name: status,
     count: kdramas.filter(d => d.status === status).length,
-  }));
+  })) : [];
+
 
   const bookChartData = bookStatusCounts.map(item => ({ name: item.name, books: item.count }));
   const movieChartData = movieStatusCounts.map(item => ({ name: item.name, movies: item.count }));
@@ -125,7 +126,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className={`grid gap-4 grid-cols-2 ${isTmdbEnabled ? 'md:grid-cols-4 xl:grid-cols-8' : 'md:grid-cols-4'}`}>
+          <div className={`grid gap-4 grid-cols-2 ${isTmdbEnabled ? 'md:grid-cols-4 xl:grid-cols-4' : 'md:grid-cols-4'}`}>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Books</CardTitle>
@@ -155,6 +156,15 @@ export default function DashboardPage() {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Anime</CardTitle>
+                <Tv className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{totalAnime}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Anime Completed</CardTitle>
                 <Clapperboard className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -162,6 +172,7 @@ export default function DashboardPage() {
                 <div className="text-2xl font-bold">{watchedAnime}</div>
               </CardContent>
             </Card>
+
             {isTmdbEnabled && (
               <>
                 <Card>
