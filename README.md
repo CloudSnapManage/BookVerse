@@ -35,7 +35,6 @@ BookVerse is a modern, personal web application that lets you manage your entire
 *   **Language**: TypeScript
 *   **Styling**: Tailwind CSS & shadcn/ui
 *   **State Management**: React Hooks & Local Storage
-*   **Client Fetching**: SWR for real-time search result fetching.
 *   **Validation**: Zod for type-safe schema validation.
 
 ## Getting Started
@@ -60,9 +59,9 @@ Follow these instructions to get a local copy of BookVerse up and running.
     pnpm install
     ```
 
-3.  **Set up environment variables:**
+3.  **Set up environment variables (Optional):**
 
-    Create a `.env` file in the root of the project. To enable movie and K-Drama search, you will need a TMDb API key.
+    Create a `.env` file in the root of the project. To enable movie and K-Drama search, you will need a TMDb API key. You can also add the key via the in-app Settings dialog after running the application.
     
     You can get a free API key by creating an account on [The Movie Database (TMDb)](https://www.themoviedb.org/signup).
 
@@ -70,10 +69,10 @@ Follow these instructions to get a local copy of BookVerse up and running.
     touch .env
     ```
 
-    Now, add your API key to the `.env` file:
+    Now, add your API key to the `.env` file. It must be a **v3 Auth Key**.
     ```
     # TMDb API Key (v3 Auth)
-    TMDB_API_KEY="your_tmdb_api_key_goes_here"
+    NEXT_PUBLIC_TMDB_API_KEY="your_tmdb_api_key_goes_here"
     ```
 
 4.  **Run the development server:**

@@ -8,7 +8,7 @@ import { Loader2, Search, Book, Film, Tv, Drama, AlertTriangle } from 'lucide-re
 import type { NormalizedMedia, MediaType } from '@/lib/types';
 import { Button } from './ui/button';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
-import { searchBooks, getBookDescription } from '@/lib/open-library';
+import { searchBooks } from '@/lib/open-library';
 import { searchAnime } from '@/lib/jikan';
 import { searchMovies, searchTvShows } from '@/lib/tmdb';
 import { useSettings } from '@/hooks/use-settings';
@@ -58,6 +58,13 @@ export function SearchMedia({
         return;
       }
 
+      if (isTmdbSearch && (!isTmdbEnabled || !tmdbApiKey)) {
+        setError("TMDb features are not enabled or an API key is missing.");
+        setResults([]);
+        return;
+      }
+
+
       setError(null);
       startTransition(async () => {
         try {
@@ -70,17 +77,13 @@ export function SearchMedia({
               searchResults = await searchAnime(debouncedQuery);
               break;
             case 'Movie':
-              if (isTmdbEnabled && tmdbApiKey) {
+              if (tmdbApiKey) {
                 searchResults = await searchMovies(debouncedQuery, 10, tmdbApiKey);
-              } else {
-                 setError("TMDb features are not enabled or API key is missing.");
               }
               break;
             case 'KDrama':
-               if (isTmdbEnabled && tmdbApiKey) {
+               if (tmdbApiKey) {
                 searchResults = await searchTvShows(debouncedQuery, 10, tmdbApiKey);
-              } else {
-                 setError("TMDb features are not enabled or API key is missing.");
               }
               break;
           }
@@ -102,7 +105,7 @@ export function SearchMedia({
     if (isSettingsLoaded) {
       performSearch();
     }
-  }, [debouncedQuery, searchType, isTmdbEnabled, tmdbApiKey, isSettingsLoaded]);
+  }, [debouncedQuery, searchType, isTmdbEnabled, tmdbApiKey, isSettingsLoaded, isTmdbSearch]);
 
 
   useEffect(() => {
