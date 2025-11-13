@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { ListFilter, ArrowUpDown } from 'lucide-react';
-import type { BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
+import type { LibraryItem, BookStatus, MovieStatus, AnimeStatus, KDramaStatus } from '@/lib/types';
 import { BOOK_STATUSES, MOVIE_STATUSES, ANIME_STATUSES, KDRAMA_STATUSES } from '@/lib/types';
 import { useSettings } from '@/hooks/use-settings';
 
@@ -33,15 +33,21 @@ const sortLabels: Record<SortKey, string> = {
 }
 
 type LibraryControlsProps = {
+  media: LibraryItem[];
   filter: BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All';
   onFilterChange: (filter: BookStatus | MovieStatus | AnimeStatus | KDramaStatus | 'All') => void;
   sort: SortOption;
   onSortChange: (sort: SortOption) => void;
 };
 
-export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: LibraryControlsProps) {
+export function LibraryControls({ media, filter, onFilterChange, sort, onSortChange }: LibraryControlsProps) {
   const { isTmdbEnabled } = useSettings();
   
+  const canSortByAuthor = React.useMemo(() => {
+    if (media.length === 0) return false;
+    return media.every(item => item.mediaType === 'Book');
+  }, [media]);
+
   return (
     <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
       {/* Sort Control */}
@@ -62,7 +68,7 @@ export function LibraryControls({ filter, onFilterChange, sort, onSortChange }: 
                 }}
             >
                 {sortKeys.map((key) => {
-                  if (!isTmdbEnabled && key === 'authors') return null;
+                  if (key === 'authors' && !canSortByAuthor) return null;
                   return (
                     <React.Fragment key={key}>
                         <DropdownMenuRadioItem value={`${key}-desc`}>{sortLabels[key]} (Desc)</DropdownMenuRadioItem>

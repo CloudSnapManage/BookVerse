@@ -171,8 +171,8 @@ export default function AppHomePage() {
         valA = a[key]?.toLowerCase();
         valB = b[key]?.toLowerCase();
       } else if (key === 'authors' && a.mediaType === 'Book' && b.mediaType === 'Book') {
-        valA = (a as Book).authors[0]?.toLowerCase() || '';
-        valB = (b as Book).authors[0]?.toLowerCase() || '';
+        valA = (a as Book).authors?.[0]?.toLowerCase() || '';
+        valB = (b as Book).authors?.[0]?.toLowerCase() || '';
       } else {
         valA = a[key as keyof typeof a];
         valB = b[key as keyof typeof b];
@@ -201,6 +201,7 @@ export default function AppHomePage() {
               <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">My Library</h1>
               <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                 <LibraryControls 
+                  media={media}
                   filter={filter} 
                   onFilterChange={setFilter}
                   sort={sort}
