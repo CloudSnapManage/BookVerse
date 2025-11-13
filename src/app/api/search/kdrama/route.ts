@@ -7,6 +7,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : 10;
 
     if (!query || query.trim().length < 3) {
       return NextResponse.json(
@@ -15,7 +17,15 @@ export async function GET(request: Request) {
       );
     }
 
-    const dramas = await searchTvShows(query);
+    const apiKey = process.env.TMDB_API_KEY;
+    if (!apiKey) {
+        return NextResponse.json(
+            { error: 'TMDB API key is not configured.' },
+            { status: 500 }
+        );
+    }
+
+    const dramas = await searchTvShows(query, limit, apiKey);
 
     return NextResponse.json(dramas);
   } catch (error) {

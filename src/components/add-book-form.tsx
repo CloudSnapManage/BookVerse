@@ -87,19 +87,28 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
     }
   }
 
+  const defaultFormValues = {
+    title: '',
+    authors: '',
+    releaseYear: '' as number | '',
+    episodes: '' as number | '',
+    status: 'Wishlist',
+    rating: 0,
+    notes: '',
+    description: '',
+    coverUrl: null,
+    openLibraryId: '',
+    tmdbId: undefined,
+    jikanMalId: undefined,
+    favoriteEpisode: '',
+    mediaType: 'Book' as 'Book' | 'Movie' | 'Anime' | 'KDrama',
+    publishYear: '' as number | '',
+  };
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-        title: '',
-        authors: '',
-        status: 'Wishlist',
-        rating: 0,
-        notes: '',
-        description: '',
-        mediaType: 'Book',
-        publishYear: undefined,
-      },
+    defaultValues: defaultFormValues,
   });
 
   useEffect(() => {
@@ -109,6 +118,10 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         rating: mediaToEdit.rating ?? 0,
         notes: mediaToEdit.notes ?? '',
         description: mediaToEdit.description ?? '',
+        favoriteEpisode: (mediaToEdit as Anime | KDrama).favoriteEpisode ?? '',
+        publishYear: (mediaToEdit as Book).publishYear ?? '',
+        releaseYear: (mediaToEdit as Movie).releaseYear ?? '',
+        episodes: (mediaToEdit as Anime).episodes ?? '',
       }
       if (mediaToEdit.mediaType === 'Book') {
         editValues.authors = (mediaToEdit as Book).authors.join(', ');
@@ -116,23 +129,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
       form.reset(editValues);
       setActiveMediaType(mediaToEdit.mediaType as 'Book' | 'Movie' | 'Anime' | 'KDrama');
     } else {
-        form.reset({
-            title: '',
-            authors: '',
-            releaseYear: undefined,
-            episodes: undefined,
-            status: 'Wishlist',
-            rating: 0,
-            notes: '',
-            description: '',
-            coverUrl: null,
-            openLibraryId: undefined,
-            tmdbId: undefined,
-            jikanMalId: undefined,
-            favoriteEpisode: '',
-            mediaType: 'Book',
-            publishYear: undefined,
-        });
+        form.reset(defaultFormValues);
         setActiveMediaType('Book');
     }
   }, [mediaToEdit, form]);
@@ -143,6 +140,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
     setActiveMediaType(media.mediaType);
     const baseReset = {
       ...form.getValues(),
+      ...defaultFormValues,
       title: media.title,
       coverUrl: (media as any).posterUrl || (media as any).coverUrl,
       description: (media as any).overview || (media as any).description,
@@ -154,7 +152,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
         mediaType: 'Book',
         authors: media.authors.join(', '),
         openLibraryId: media.openLibraryId,
-        publishYear: media.publishYear ?? undefined,
+        publishYear: media.publishYear ?? '',
         status: 'Owned',
       });
     } else if (media.mediaType === 'Movie') {
@@ -162,7 +160,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             ...baseReset,
             mediaType: 'Movie',
             tmdbId: media.tmdbId ?? undefined,
-            releaseYear: media.releaseYear ?? undefined,
+            releaseYear: media.releaseYear ?? '',
             status: 'Watched',
         });
     } else if (media.mediaType === 'Anime') {
@@ -170,7 +168,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             ...baseReset,
             mediaType: 'Anime',
             jikanMalId: media.jikanMalId ?? undefined,
-            episodes: media.episodes ?? undefined,
+            episodes: media.episodes ?? '',
             status: 'Watching',
         });
     } else if (media.mediaType === 'KDrama') {
@@ -178,8 +176,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             ...baseReset,
             mediaType: 'KDrama',
             tmdbId: media.tmdbId ?? undefined,
-            releaseYear: media.releaseYear ?? undefined,
-            episodes: media.episodes ?? undefined,
+            releaseYear: media.releaseYear ?? '',
+            episodes: media.episodes ?? '',
             status: 'Watching',
         });
     }
@@ -275,7 +273,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                       <FormItem>
                           <FormLabel>Publish Year</FormLabel>
                           <FormControl>
-                              <Input type="number" placeholder="1954" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
+                              <Input type="number" placeholder="1954" {...field} value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? '' : parseInt(e.target.value, 10))} />
                           </FormControl>
                           <FormMessage />
                       </FormItem>
@@ -291,7 +289,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                     <FormItem>
                         <FormLabel>Release Year</FormLabel>
                         <FormControl>
-                            <Input type="number" placeholder="2023" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
+                            <Input type="number" placeholder="2023" {...field} value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? '' : parseInt(e.target.value, 10))} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -307,7 +305,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                     <FormItem>
                         <FormLabel>Episodes</FormLabel>
                         <FormControl>
-                            <Input type="number" placeholder="24" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
+                            <Input type="number" placeholder="24" {...field} value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? '' : parseInt(e.target.value, 10))} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
