@@ -102,7 +102,7 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                   <div>
                     <DialogTitle className="font-headline text-2xl md:text-3xl mb-1 drop-shadow-md text-foreground">{media.title}</DialogTitle>
                     {isBook && book?.authors && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{book.authors.join(', ')}</DialogDescription>}
-                    {(isMovie || isKDrama) && (movie || kdrama)?.releaseYear && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{(movie || kdrama).releaseYear}</DialogDescription>}
+                    {(isMovie || isKDrama) && (movie || kdrama)?.releaseYear && <DialogDescription className="text-base md:text-lg text-muted-foreground drop-shadow">{(movie || kdrama)?.releaseYear}</DialogDescription>}
                   </div>
                   
                   <div className="flex items-center flex-shrink-0 gap-1">
