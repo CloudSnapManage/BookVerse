@@ -166,7 +166,7 @@ export function MediaDetailsDialog({ media, open, onOpenChange, onEdit, onDelete
                       {(isAnime || isKDrama) && (anime || kdrama)?.episodes && (
                           <div className="flex items-center justify-between">
                               <span className='text-sm font-medium'>Episodes</span>
-                              <span className="text-sm text-muted-foreground flex items-center gap-2"><Tv className="h-4 w-4" /> {(anime || kdrama).episodes}</span>
+                              <span className="text-sm text-muted-foreground flex items-center gap-2"><Tv className="h-4 w-4" /> {(anime || kdrama)?.episodes}</span>
                           </div>
                       )}
                   </div>
