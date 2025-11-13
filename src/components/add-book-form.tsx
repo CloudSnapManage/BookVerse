@@ -21,14 +21,14 @@ const formSchema = z.object({
   // Book specific
   authors: z.string().optional(),
   openLibraryId: z.string().optional(),
-  publishYear: z.number().optional(),
+  publishYear: z.union([z.number(), z.string()]).optional(),
   
   // Movie/Drama specific
-  releaseYear: z.number().optional(),
+  releaseYear: z.union([z.number(), z.string()]).optional(),
   tmdbId: z.number().optional(),
 
   // Anime/Drama specific
-  episodes: z.number().optional(),
+  episodes: z.union([z.number(), z.string()]).optional(),
   favoriteEpisode: z.string().optional(),
 
   // Anime specific
@@ -39,7 +39,7 @@ const formSchema = z.object({
   status: z.string(),
   rating: z.number().int().min(0).max(5).optional(),
   notes: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   coverUrl: z.string().url().optional().nullable(),
 });
 
@@ -90,8 +90,8 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
   const defaultFormValues = {
     title: '',
     authors: '',
-    releaseYear: '' as number | '',
-    episodes: '' as number | '',
+    releaseYear: '',
+    episodes: '',
     status: 'Wishlist',
     rating: 0,
     notes: '',
@@ -102,7 +102,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
     jikanMalId: undefined,
     favoriteEpisode: '',
     mediaType: 'Book' as 'Book' | 'Movie' | 'Anime' | 'KDrama',
-    publishYear: '' as number | '',
+    publishYear: '',
   };
 
 
@@ -203,27 +203,27 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
           ...commonData,
           authors: values.authors ? values.authors.split(',').map(a => a.trim()) : [],
           openLibraryId: values.openLibraryId,
-          publishYear: values.publishYear,
+          publishYear: values.publishYear ? Number(values.publishYear) : undefined,
         }
       } else if (values.mediaType === 'Movie') {
         finalData = {
             ...commonData,
-            releaseYear: values.releaseYear,
+            releaseYear: values.releaseYear ? Number(values.releaseYear) : undefined,
             tmdbId: values.tmdbId,
         }
       } else if (values.mediaType === 'Anime') {
         finalData = {
           ...commonData,
-          episodes: values.episodes,
+          episodes: values.episodes ? Number(values.episodes) : undefined,
           jikanMalId: values.jikanMalId,
           favoriteEpisode: values.favoriteEpisode,
         }
       } else { // KDrama
         finalData = {
           ...commonData,
-          episodes: values.episodes,
+          episodes: values.episodes ? Number(values.episodes) : undefined,
           tmdbId: values.tmdbId,
-          releaseYear: values.releaseYear,
+          releaseYear: values.releaseYear ? Number(values.releaseYear) : undefined,
           favoriteEpisode: values.favoriteEpisode,
         }
       }
@@ -317,7 +317,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Favorite Episode</FormLabel>
-                    <FormControl><Input placeholder="Ep. 10: Turning Point" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Ep. 10: Turning Point" {...field} value={field.value ?? ''} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -368,7 +368,7 @@ export function AddBookForm({ onFormSubmit, mediaToEdit }: AddBookFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>My Notes</FormLabel>
-                <FormControl><Textarea placeholder="Your thoughts, quotes, or a short review..." {...field} /></FormControl>
+                <FormControl><Textarea placeholder="Your thoughts, quotes, or a short review..." {...field} value={field.value ?? ''} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
